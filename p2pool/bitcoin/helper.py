@@ -19,7 +19,7 @@ def check(bitcoind, net):
 
 @deferral.retry('Error getting work from bitcoind:', 3)
 @defer.inlineCallbacks
-def getwork(bitcoind, use_getblocktemplate=False):
+def getwork(bitcoind, net, use_getblocktemplate=False):
     def go():
         if use_getblocktemplate:
             return bitcoind.rpc_getblocktemplate(dict(mode='template'))
@@ -39,6 +39,7 @@ def getwork(bitcoind, use_getblocktemplate=False):
             print >>sys.stderr, 'Error: Bitcoin version too old! Upgrade to v0.5 or newer!'
             raise deferral.RetrySilentlyException()
     packed_transactions = [(x['data'] if isinstance(x, dict) else x).decode('hex') for x in work['transactions']]
+    packed_votes = [(x['data'] if isinstance(x, dict) else x).decode('hex') for x in work['votes']]
     if 'height' not in work:
         work['height'] = (yield bitcoind.rpc_getblock(work['previousblockhash']))['height'] + 1
     elif p2pool.DEBUG:
@@ -57,6 +58,8 @@ def getwork(bitcoind, use_getblocktemplate=False):
         last_update=time.time(),
         use_getblocktemplate=use_getblocktemplate,
         latency=end - start,
+        votes=map(bitcoin_data.vote_type.unpack, packed_votes),
+        payee=bitcoin_data.address_to_pubkey_hash(work['payee'], net.PARENT) if (work['payee'] != '') else None
     ))
 
 @deferral.retry('Error submitting primary block: (will retry)', 10, 10)

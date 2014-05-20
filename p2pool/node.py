@@ -180,13 +180,13 @@ class Node(object):
         
         # BITCOIND WORK
         
-        self.bitcoind_work = variable.Variable((yield helper.getwork(self.bitcoind)))
+        self.bitcoind_work = variable.Variable((yield helper.getwork(self.bitcoind, self.net)))
         @defer.inlineCallbacks
         def work_poller():
             while stop_signal.times == 0:
                 flag = self.factory.new_block.get_deferred()
                 try:
-                    self.bitcoind_work.set((yield helper.getwork(self.bitcoind, self.bitcoind_work.value['use_getblocktemplate'])))
+                    self.bitcoind_work.set((yield helper.getwork(self.bitcoind, self.net, self.bitcoind_work.value['use_getblocktemplate'])))
                 except:
                     log.err()
                 yield defer.DeferredList([flag, deferral.sleep(15)], fireOnOneCallback=True)
@@ -203,10 +203,10 @@ class Node(object):
             if (self.best_block_header.value is None
                 or (
                     new_header['previous_block'] == bitcoind_best_block and
-                    bitcoin_data.hash256(bitcoin_data.block_header_type.pack(self.best_block_header.value)) == bitcoind_best_block
+                    self.net.PARENT.BLOCKHASH_FUNC(bitcoin_data.block_header_type.pack(self.best_block_header.value)) == bitcoind_best_block
                 ) # new is child of current and previous is current
                 or (
-                    bitcoin_data.hash256(bitcoin_data.block_header_type.pack(new_header)) == bitcoind_best_block and
+                    self.net.PARENT.BLOCKHASH_FUNC(bitcoin_data.block_header_type.pack(new_header)) == bitcoind_best_block and
                     self.best_block_header.value['previous_block'] != bitcoind_best_block
                 )): # new is current and previous is not a child of current
                 self.best_block_header.set(new_header)

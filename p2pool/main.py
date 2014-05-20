@@ -54,7 +54,7 @@ def main(args, net, datadir_path, merged_urls, worker_endpoint):
         print '''Testing bitcoind RPC connection to '%s' with username '%s'...''' % (url, args.bitcoind_rpc_username)
         bitcoind = jsonrpc.HTTPProxy(url, dict(Authorization='Basic ' + base64.b64encode(args.bitcoind_rpc_username + ':' + args.bitcoind_rpc_password)), timeout=30)
         yield helper.check(bitcoind, net)
-        temp_work = yield helper.getwork(bitcoind)
+        temp_work = yield helper.getwork(bitcoind, net)
         
         bitcoind_getinfo_var = variable.Variable(None)
         @defer.inlineCallbacks
@@ -364,8 +364,8 @@ def run():
     parser = fixargparse.FixedArgumentParser(description='p2pool (version %s)' % (p2pool.__version__,), fromfile_prefix_chars='@')
     parser.add_argument('--version', action='version', version=p2pool.__version__)
     parser.add_argument('--net',
-        help='use specified network (default: bitcoin)',
-        action='store', choices=sorted(realnets), default='bitcoin', dest='net_name')
+        help='use specified network (default: darkcoin)',
+        action='store', choices=sorted(realnets), default='darkcoin', dest='net_name')
     parser.add_argument('--testnet',
         help='''use the network's testnet''',
         action='store_const', const=True, default=False, dest='testnet')
