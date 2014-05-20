@@ -25,7 +25,7 @@ nets = dict(
             'darkcoinaddress' in (yield bitcoind.rpc_help()) and
             not (yield bitcoind.rpc_getinfo())['testnet']
         )),
-        SUBSIDY_FUNC=lambda nBits, height: __import__('darkcoin_subsidy').GetBlockBaseValue(nBits, height),
+        SUBSIDY_FUNC=lambda nBits, height: __import__('darkcoin_subsidy').getBlockBaseValue(nBits, height),
         BLOCKHASH_FUNC=lambda data: pack.IntType(256).unpack(__import__('xcoin_hash').getPoWHash(data)),
         POW_FUNC=lambda data: pack.IntType(256).unpack(__import__('xcoin_hash').getPoWHash(data)),
         BLOCK_PERIOD=150, # s
@@ -47,7 +47,7 @@ nets = dict(
             'darkcoinaddress' in (yield bitcoind.rpc_help()) and
             (yield bitcoind.rpc_getinfo())['testnet']
         )),
-        SUBSIDY_FUNC=lambda nBits, height: __import__('darkcoin_subsidy').GetBlockBaseValue(nBits, height),
+        SUBSIDY_FUNC=lambda nBits, height: __import__('darkcoin_subsidy').getBlockBaseValue_testnet(nBits, height),
         BLOCKHASH_FUNC=lambda data: pack.IntType(256).unpack(__import__('xcoin_hash').getPoWHash(data)),
         POW_FUNC=lambda data: pack.IntType(256).unpack(__import__('xcoin_hash').getPoWHash(data)),
         BLOCK_PERIOD=150, # s
