@@ -215,10 +215,23 @@ def get_web_root(wb, datadir_path, bitcoind_getinfo_var, stop_event=variable.Eve
     ))))
     web_root.putChild('peer_versions', WebInterface(lambda: dict(('%s:%i' % peer.addr, peer.other_sub_version) for peer in node.p2p_node.peers.itervalues())))
     web_root.putChild('payout_addr', WebInterface(lambda: bitcoin_data.pubkey_hash_to_address(wb.my_pubkey_hash, node.net.PARENT)))
+    def height_from_coinbase(coinbase):
+        opcode = ord(coinbase[0]) if len(coinbase) > 0 else 0
+        if opcode >= 1 and opcode <= 75: 
+            return pack.IntType(opcode*8).unpack(coinbase[1:opcode+1])
+        if opcode == 76: 
+            return pack.IntType(8).unpack(coinbase[1:2])
+        if opcode == 77: 
+            return pack.IntType(8).unpack(coinbase[1:3])
+        if opcode == 78: 
+            return pack.IntType(8).unpack(coinbase[1:5])
+        if opcode >= 79 and opcode <= 96:
+           return opcode - 80
+        return None
     web_root.putChild('recent_blocks', WebInterface(lambda: [dict(
         ts=s.timestamp,
         hash='%064x' % s.header_hash,
-        number=pack.IntType(24).unpack(s.share_data['coinbase'][1:4]) if len(s.share_data['coinbase']) >= 4 else None,
+        number=height_from_coinbase(s.share_data['coinbase']),
         share='%064x' % s.hash,
     ) for s in node.tracker.get_chain(node.best_share_var.value, min(node.tracker.get_height(node.best_share_var.value), 24*60*60//node.net.SHARE_PERIOD)) if s.pow_hash <= s.header['bits'].target]))
     web_root.putChild('uptime', WebInterface(lambda: time.time() - start_time))
