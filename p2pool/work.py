@@ -281,6 +281,7 @@ class WorkerBridge(worker_interface.WorkerBridge):
                         None
                     )(*self.get_stale_counts()),
                     desired_version=(share_type.SUCCESSOR if share_type.SUCCESSOR is not None else share_type).VOTING_VERSION,
+                    votes=self.current_work.value['votes'],
                     payee=self.current_work.value['payee'],
                 ),
                 block_target=self.current_work.value['bits'].target,
