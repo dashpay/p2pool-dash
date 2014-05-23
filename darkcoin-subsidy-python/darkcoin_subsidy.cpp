@@ -78,8 +78,8 @@ static PyObject *darkcoin_subsidy_getblockbasevalue_testnet(PyObject *self, PyOb
 }
 
 static PyMethodDef darkcoin_subsidy_methods[] = {
-    { "getBlockBaseValue", darkcoin_subsidy_getblockbasevalue, METH_VARARGS, "Returns the block value" },
-    { "getBlockBaseValue_testnet", darkcoin_subsidy_getblockbasevalue_testnet, METH_VARARGS, "Returns the block value for testnet" },
+    { "GetBlockBaseValue", darkcoin_subsidy_getblockbasevalue, METH_VARARGS, "Returns the block value" },
+    { "GetBlockBaseValue_testnet", darkcoin_subsidy_getblockbasevalue_testnet, METH_VARARGS, "Returns the block value for testnet" },
     { NULL, NULL, 0, NULL }
 };
 
