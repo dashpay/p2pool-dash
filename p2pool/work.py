@@ -103,7 +103,6 @@ class WorkerBridge(worker_interface.WorkerBridge):
                     merkle_link=bitcoin_data.calculate_merkle_link([None], 0),
                     subsidy=self.node.net.PARENT.SUBSIDY_FUNC(self.node.bitcoind_work.value['bits'].bits, self.node.bitcoind_work.value['height']),
                     last_update=self.node.bitcoind_work.value['last_update'],
-                    votes=self.node.bitcoind_work.value['votes'],
                     payee=self.node.bitcoind_work.value['payee'],
                 )
             
@@ -283,7 +282,6 @@ class WorkerBridge(worker_interface.WorkerBridge):
                         None
                     )(*self.get_stale_counts()),
                     desired_version=(share_type.SUCCESSOR if share_type.SUCCESSOR is not None else share_type).VOTING_VERSION,
-                    votes=self.current_work.value['votes'],
                     payee=self.current_work.value['payee'],
                 ),
                 block_target=self.current_work.value['bits'].target,
@@ -350,7 +348,7 @@ class WorkerBridge(worker_interface.WorkerBridge):
             pow_hash = self.node.net.PARENT.POW_FUNC(bitcoin_data.block_header_type.pack(header))
             try:
                 if pow_hash <= header['bits'].target or p2pool.DEBUG:
-                    helper.submit_block(dict(header=header, txs=[new_gentx] + other_transactions, votes=self.current_work.value['votes']), False, self.node.factory, self.node.bitcoind, self.node.bitcoind_work, self.node.net)
+                    helper.submit_block(dict(header=header, txs=[new_gentx] + other_transactions, votes=self.node.bitcoind_work.value['votes']), False, self.node.factory, self.node.bitcoind, self.node.bitcoind_work, self.node.net)
                     if pow_hash <= header['bits'].target:
                         print
                         print 'GOT BLOCK FROM MINER! Passing to bitcoind! %s%064x' % (self.node.net.PARENT.BLOCK_EXPLORER_URL_PREFIX, header_hash)

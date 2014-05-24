@@ -74,13 +74,6 @@ class Share(object):
             ('donation', pack.IntType(16)),
             ('stale_info', pack.EnumType(pack.IntType(8), dict((k, {0: None, 253: 'orphan', 254: 'doa'}.get(k, 'unk%i' % (k,))) for k in xrange(256)))),
             ('desired_version', pack.VarIntType()),
-            ('votes', pack.ListType(
-                pack.ComposedType([
-                    ('block_height', pack.IntType(64)),
-                    ('pubkey', pack.VarStrType()),
-                    ('votes', pack.IntType(32)),
-                ])
-            )),
             ('payee', pack.PossiblyNoneType(0, pack.IntType(160))),
         ])),
         ('new_transaction_hashes', pack.ListType(pack.IntType(256))),
@@ -385,11 +378,10 @@ class Share(object):
         
         return False, None
     
-    def as_block(self, tracker, known_txs):
+    def as_block(self, tracker, known_txs, votes):
         other_txs = self._get_other_txs(tracker, known_txs)
         if other_txs is None:
             return None # not all txs present
-        votes = self.share_data['votes']
         return dict(header=self.header, txs=[self.check(tracker)] + other_txs, votes=votes)
 
 
