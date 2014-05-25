@@ -13,14 +13,16 @@ Linux:
 Install Python modules:
 -------------------------
 xcoin-hash:
-* git clone https://github.com/darkcoinproject/xcoin-hash.git
-* cd xcoin-hash
-* rm -rf build
-* python setup.py install
+
+    git clone https://github.com/darkcoinproject/xcoin-hash.git
+    cd xcoin-hash
+    rm -rf build
+    python setup.py install
 
 darkcoin_subsidy:
-* cd darkcoin_subsidy_python
-* python setup.py install
+
+    cd darkcoin_subsidy_python
+    python setup.py install
 
 Running P2Pool:
 -------------------------
@@ -55,4 +57,3 @@ Sponsors:
 Thanks to:
 * The Bitcoin Foundation for its generous support of P2Pool
 * The Litecoin Project for its generous donations to P2Pool
-
