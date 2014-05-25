@@ -17,7 +17,7 @@ def check_genesis_block(bitcoind, genesis_block_hash):
 
 nets = dict(
     darkcoin=math.Object(
-        P2P_PREFIX='bf0cfbbd'.decode('hex'),
+        P2P_PREFIX='bf0c6bbd'.decode('hex'),
         P2P_PORT=9999,
         ADDRESS_VERSION=76,
         RPC_PORT=9998,
