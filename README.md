@@ -21,9 +21,9 @@ xcoin-hash:
     rm -rf build
     python setup.py install
 
-darkcoin_subsidy:
+darkcoin-subsidy-python:
 
-    cd darkcoin_subsidy_python
+    cd darkcoin-subsidy-python
     python setup.py install
 
 Running P2Pool:
