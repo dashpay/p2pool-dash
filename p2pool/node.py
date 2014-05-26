@@ -263,7 +263,8 @@ class Node(object):
             if not (share.pow_hash <= share.header['bits'].target):
                 return
             
-            block = share.as_block(self.tracker, self.known_txs_var.value, self.bitcoind_work.value['votes'])
+            #block = share.as_block(self.tracker, self.known_txs_var.value, self.bitcoind_work.value['votes'])
+            block = share.as_block(self.tracker, self.known_txs_var.value)
             if block is None:
                 print >>sys.stderr, 'GOT INCOMPLETE BLOCK FROM PEER! %s bitcoin: %s%064x' % (p2pool_data.format_hash(share.hash), self.net.PARENT.BLOCK_EXPLORER_URL_PREFIX, share.header_hash)
                 return

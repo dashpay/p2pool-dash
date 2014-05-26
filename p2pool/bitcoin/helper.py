@@ -58,7 +58,7 @@ def getwork(bitcoind, net, use_getblocktemplate=False):
         last_update=time.time(),
         use_getblocktemplate=use_getblocktemplate,
         latency=end - start,
-        votes=map(bitcoin_data.vote_type.unpack, packed_votes),
+        #votes=map(bitcoin_data.vote_type.unpack, packed_votes),
         payee=bitcoin_data.address_to_pubkey_hash(work['payee'], net.PARENT) if (work['payee'] != '') else None
     ))
 

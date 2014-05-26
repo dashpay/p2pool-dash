@@ -137,7 +137,7 @@ block_header_type = pack.ComposedType([
 block_type = pack.ComposedType([
     ('header', block_header_type),
     ('txs', pack.ListType(tx_type)),
-    ('votes', pack.ListType(vote_type)),
+    #('votes', pack.ListType(vote_type)),
 ])
 
 # merged mining
