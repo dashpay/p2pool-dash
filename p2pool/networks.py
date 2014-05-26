@@ -23,7 +23,7 @@ nets = dict(
         PERSIST=True,
         #WORKER_PORT=8998,
         WORKER_PORT=7903,
-        BOOTSTRAP_ADDRS='drk.altmine.net drk2.altmine.net drk3.altmine.net asia01.poolhash.org asia02.poolhash.org q30.qhor.net poulpe.nirnroot.com drk.p2pool.n00bsys0p.co.uk darkcoin.kicks-ass.net darkcoin.fr cryptohasher.net coinminer.net'.split(' '),
+        BOOTSTRAP_ADDRS='drk.altmine.net drk2.altmine.net drk3.altmine.net asia01.poolhash.org asia02.poolhash.org q30.qhor.net poulpe.nirnroot.com drk.p2pool.n00bsys0p.co.uk darkcoin.kicks-ass.net darkcoin.fr cryptohasher.net coinminer.net drk.coinquarry.net drk.kopame.com 54.186.8.140 rebootcamp.de'.split(' '),
         ANNOUNCE_CHANNEL='#p2pool-drk',
         VERSION_CHECK=lambda v: True,
     ),
