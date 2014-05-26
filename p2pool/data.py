@@ -181,7 +181,7 @@ class Share(object):
         if sum(amounts.itervalues()) != worker_payout or any(x < 0 for x in amounts.itervalues()):
             raise ValueError()
         
-        worker_scripts = [k for k in amounts.iterkeys() if k != DONATION_SCRIPT]
+        worker_scripts = sorted([k for k in amounts.iterkeys() if k != DONATION_SCRIPT])
         worker_tx=[dict(value=amounts[script], script=script) for script in worker_scripts if amounts[script]]
         
         donation_tx = [dict(value=amounts[DONATION_SCRIPT], script=DONATION_SCRIPT)]
