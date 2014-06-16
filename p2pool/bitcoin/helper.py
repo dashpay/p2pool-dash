@@ -58,8 +58,9 @@ def getwork(bitcoind, net, use_getblocktemplate=False):
         last_update=time.time(),
         use_getblocktemplate=use_getblocktemplate,
         latency=end - start,
-        #votes=map(bitcoin_data.vote_type.unpack, packed_votes),
-        payee=bitcoin_data.address_to_pubkey_hash(work['payee'], net.PARENT) if (work['payee'] != '') else None
+        votes=map(bitcoin_data.vote_type.unpack, packed_votes),
+        payee=bitcoin_data.address_to_pubkey_hash(work['payee'], net.PARENT) if (work['payee'] != '') else None,
+        masternode_payments=work['masternode_payments'],
     ))
 
 @deferral.retry('Error submitting primary block: (will retry)', 10, 10)
@@ -85,6 +86,33 @@ def submit_block_rpc(block, ignore_failure, bitcoind, bitcoind_work, net):
     if (not success and success_expected and not ignore_failure) or (success and not success_expected):
         print >>sys.stderr, 'Block submittal result: %s (%r) Expected: %s' % (success, result, success_expected)
 
+@deferral.retry('Error submitting primary block: (will retry)', 10, 10)
+def submit_block_p2p_old(block, factory, net):
+    if factory.conn.value is None:
+        print >>sys.stderr, 'No bitcoind connection when block submittal attempted! %s%064x' % (net.PARENT.BLOCK_EXPLORER_URL_PREFIX, bitcoin_data.hash256(bitcoin_data.block_header_type.pack(block['header'])))
+        raise deferral.RetrySilentlyException()
+    factory.conn.value.send_block_old(block=block)
+
+@deferral.retry('Error submitting block: (will retry)', 10, 10)
+@defer.inlineCallbacks
+def submit_block_rpc_old(block, ignore_failure, bitcoind, bitcoind_work, net):
+    if bitcoind_work.value['use_getblocktemplate']:
+        try:
+            result = yield bitcoind.rpc_submitblock(bitcoin_data.block_type_old.pack(block).encode('hex'))
+        except jsonrpc.Error_for_code(-32601): # Method not found, for older litecoin versions
+            result = yield bitcoind.rpc_getblocktemplate(dict(mode='submit', data=bitcoin_data.block_type_old.pack(block).encode('hex')))
+        success = result is None
+    else:
+        result = yield bitcoind.rpc_getmemorypool(bitcoin_data.block_type_old.pack(block).encode('hex'))
+        success = result
+    success_expected = net.PARENT.POW_FUNC(bitcoin_data.block_header_type.pack(block['header'])) <= block['header']['bits'].target
+    if (not success and success_expected and not ignore_failure) or (success and not success_expected):
+        print >>sys.stderr, 'Block submittal result: %s (%r) Expected: %s' % (success, result, success_expected)
+
 def submit_block(block, ignore_failure, factory, bitcoind, bitcoind_work, net):
-    submit_block_p2p(block, factory, net)
-    submit_block_rpc(block, ignore_failure, bitcoind, bitcoind_work, net)
+    if bitcoind_work.value['masternode_payments']:
+        submit_block_p2p(block, factory, net)
+        submit_block_rpc(block, ignore_failure, bitcoind, bitcoind_work, net)
+    else:
+        submit_block_p2p_old(block, factory, net)
+        submit_block_rpc_old(block, ignore_failure, bitcoind, bitcoind_work, net)
