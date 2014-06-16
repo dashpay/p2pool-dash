@@ -168,7 +168,7 @@ class Share(object):
         
         masternode_tx = []
         if share_data['payee'] is not None:
-            masternode_payout = worker_payout / 10
+            masternode_payout = worker_payout / 5
             worker_payout -= masternode_payout
             payee_script = bitcoin_data.pubkey_hash_to_script2(share_data['payee'])
             masternode_tx = [dict(value=masternode_payout, script=payee_script)]
