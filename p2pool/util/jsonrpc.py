@@ -67,6 +67,16 @@ def _handle(data, provider, preargs=(), response_handler=None):
                 
                 id_ = req.get('id', None)
                 method = req.get('method', None)
+
+                # return an error message that sgminer understands
+                if method == 'mining.extranonce.subscribe':
+                    defer.returnValue(json.dumps(dict(
+                        id=id_,
+                        result=None,
+                        error=[-3, "Method 'subscribe' not found for service 'mining.extranonce'", None],
+                    )))
+                    return
+
                 if not isinstance(method, basestring):
                     raise Error_for_code(-32600)(u'Invalid Request')
                 params = req.get('params', [])
