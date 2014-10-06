@@ -104,6 +104,7 @@ class WorkerBridge(worker_interface.WorkerBridge):
                     subsidy=self.node.net.PARENT.SUBSIDY_FUNC(self.node.bitcoind_work.value['bits'].bits, self.node.bitcoind_work.value['height']),
                     last_update=self.node.bitcoind_work.value['last_update'],
                     payee=self.node.bitcoind_work.value['payee'],
+                    payee_amount=self.node.bitcoind_work.value['payee_amount'],
                 )
             
             self.current_work.set(t)
@@ -283,6 +284,7 @@ class WorkerBridge(worker_interface.WorkerBridge):
                     )(*self.get_stale_counts()),
                     desired_version=(share_type.SUCCESSOR if share_type.SUCCESSOR is not None else share_type).VOTING_VERSION,
                     payee=self.current_work.value['payee'],
+                    payee_amount=self.current_work.value['payee_amount'],
                 ),
                 block_target=self.current_work.value['bits'].target,
                 desired_timestamp=int(time.time() + 0.5),

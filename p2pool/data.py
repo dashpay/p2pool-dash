@@ -75,6 +75,7 @@ class Share(object):
             ('stale_info', pack.EnumType(pack.IntType(8), dict((k, {0: None, 253: 'orphan', 254: 'doa'}.get(k, 'unk%i' % (k,))) for k in xrange(256)))),
             ('desired_version', pack.VarIntType()),
             ('payee', pack.PossiblyNoneType(0, pack.IntType(160))),
+            ('payee_amount', pack.IntType(64)),
         ])),
         ('new_transaction_hashes', pack.ListType(pack.IntType(256))),
         ('transaction_hash_refs', pack.ListType(pack.VarIntType(), 2)), # pairs of share_count, tx_count
@@ -168,7 +169,7 @@ class Share(object):
         
         masternode_tx = []
         if share_data['payee'] is not None:
-            masternode_payout = worker_payout / 5
+            masternode_payout = share_data['payee_amount']
             worker_payout -= masternode_payout
             payee_script = bitcoin_data.pubkey_hash_to_script2(share_data['payee'])
             masternode_tx = [dict(value=masternode_payout, script=payee_script)]
