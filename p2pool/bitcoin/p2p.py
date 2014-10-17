@@ -19,7 +19,7 @@ class Protocol(p2protocol.Protocol):
     
     def connectionMade(self):
         self.send_version(
-            version=70038,
+            version=70043,
             services=1,
             time=int(time.time()),
             addr_to=dict(
