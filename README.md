@@ -2,7 +2,7 @@ Requirements:
 -------------------------
 Generic:
 
-* Darkcoin >=0.9.4.6
+* Darkcoin >=0.11.0.11
 * Python >=2.6
 * Twisted >=10.0.0
 * python-argparse (for Python =2.6)
@@ -16,14 +16,13 @@ Install Python modules:
 -------------------------
 xcoin-hash:
 
-    git clone https://github.com/darkcoinproject/xcoin-hash.git
     cd xcoin-hash
     rm -rf build
     python setup.py install
 
-darkcoin-subsidy-python:
+darkcoin-subsidy:
 
-    cd darkcoin-subsidy-python
+    cd darkcoin-subsidy
     python setup.py install
 
 Running P2Pool:
@@ -33,7 +32,7 @@ configurations, using P2Pool should be as simple as:
 
     python run_p2pool.py
 
-Then run your miner program, connecting to 127.0.0.1 on port 8998 with any
+Then run your miner program, connecting to 127.0.0.1 on port 7903 with any
 username and password.
 
 If you are behind a NAT, you should enable TCP port forwarding on your
