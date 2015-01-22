@@ -16,14 +16,13 @@ Install Python modules:
 -------------------------
 xcoin-hash:
 
-    git clone https://github.com/darkcoinproject/xcoin-hash.git
     cd xcoin-hash
     rm -rf build
     python setup.py install
 
-darkcoin-subsidy-python:
+darkcoin-subsidy:
 
-    cd darkcoin-subsidy-python
+    cd darkcoin-subsidy
     python setup.py install
 
 Running P2Pool:
