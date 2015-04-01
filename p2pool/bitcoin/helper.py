@@ -60,8 +60,8 @@ def getwork(bitcoind, net, use_getblocktemplate=False):
         latency=end - start,
         votes=map(bitcoin_data.vote_type.unpack, packed_votes),
         payee=bitcoin_data.address_to_pubkey_hash(work['payee'], net.PARENT) if (work['payee'] != '') else None,
-        payee_amount=work['payee_amount'] if (work['payee_amount'] != '') else work['coinbasevalue'] / 5,
         masternode_payments=work['masternode_payments'],
+        payee_amount=work['payee_amount'] if (work['payee_amount'] != '') else work['coinbasevalue'] / 5,
     ))
 
 @deferral.retry('Error submitting primary block: (will retry)', 10, 10)

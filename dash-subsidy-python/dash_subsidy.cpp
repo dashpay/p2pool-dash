@@ -57,7 +57,7 @@ long long static GetBlockBaseValue(int nBits, int nHeight, bool fTestNet = false
     return nSubsidy;
 }
 
-static PyObject *darkcoin_subsidy_getblockbasevalue(PyObject *self, PyObject *args)
+static PyObject *dash_subsidy_getblockbasevalue(PyObject *self, PyObject *args)
 {
     int input_bits;
     int input_height;
@@ -67,7 +67,7 @@ static PyObject *darkcoin_subsidy_getblockbasevalue(PyObject *self, PyObject *ar
     return Py_BuildValue("L", output);
 }
 
-static PyObject *darkcoin_subsidy_getblockbasevalue_testnet(PyObject *self, PyObject *args)
+static PyObject *dash_subsidy_getblockbasevalue_testnet(PyObject *self, PyObject *args)
 {
     int input_bits;
     int input_height;
@@ -77,12 +77,12 @@ static PyObject *darkcoin_subsidy_getblockbasevalue_testnet(PyObject *self, PyOb
     return Py_BuildValue("L", output);
 }
 
-static PyMethodDef darkcoin_subsidy_methods[] = {
-    { "GetBlockBaseValue", darkcoin_subsidy_getblockbasevalue, METH_VARARGS, "Returns the block value" },
-    { "GetBlockBaseValue_testnet", darkcoin_subsidy_getblockbasevalue_testnet, METH_VARARGS, "Returns the block value for testnet" },
+static PyMethodDef dash_subsidy_methods[] = {
+    { "GetBlockBaseValue", dash_subsidy_getblockbasevalue, METH_VARARGS, "Returns the block value" },
+    { "GetBlockBaseValue_testnet", dash_subsidy_getblockbasevalue_testnet, METH_VARARGS, "Returns the block value for testnet" },
     { NULL, NULL, 0, NULL }
 };
 
-PyMODINIT_FUNC initdarkcoin_subsidy(void) {
-    (void) Py_InitModule("darkcoin_subsidy", darkcoin_subsidy_methods);
+PyMODINIT_FUNC initdash_subsidy(void) {
+    (void) Py_InitModule("dash_subsidy", dash_subsidy_methods);
 }
