@@ -15,14 +15,14 @@ nets = dict(
         REAL_CHAIN_LENGTH=24*60*60//20, # shares
         TARGET_LOOKBEHIND=100, # shares  //with that the pools share diff is adjusting faster, important if huge hashing power comes to the pool
         SPREAD=10, # blocks
-        IDENTIFIER='aa185015e0a384f5'.decode('hex'),
-        PREFIX='85fd8cff82f170de'.decode('hex'),
+        IDENTIFIER='7242ef345e1bed6b'.decode('hex'),
+        PREFIX='3b3e1286f446b891'.decode('hex'),
         P2P_PORT=8999,
         MIN_TARGET=0,
         MAX_TARGET=2**256//2**20 - 1,
         PERSIST=True,
         WORKER_PORT=7903,
-        BOOTSTRAP_ADDRS='eu.p2pool.pl drk.altmine.net darkcoin.fr p2pool.crunchpool.com happymining.de'.split(' '),
+        BOOTSTRAP_ADDRS='eu.p2pool.pl p2pool.dashninja.pl dash.p2pools.us darkcoin.fr p2pool.crunchpool.com happymining.de'.split(' '),
         ANNOUNCE_CHANNEL='#p2pool-drk',
         VERSION_CHECK=lambda v: v >= 110011,
     ),
