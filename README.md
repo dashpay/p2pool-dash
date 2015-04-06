@@ -14,13 +14,18 @@ Linux:
 
 Install Python modules:
 -------------------------
-darkcoin_hash:
+Download the required submodules:
+
+    git submodule init
+    git submodule update
+
+x11_hash:
 
     git clone https://github.com/vertoe/darkcoin_hash.git
     cd darkcoin_hash
     python setup.py install
 
-darkcoin_subsidy:
+dash_subsidy:
 
     git clone https://github.com/vertoe/darkcoin_subsidy.git
     cd darkcoin_subsidy
