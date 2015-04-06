@@ -65,7 +65,7 @@ class Protocol(p2protocol.Protocol):
 
     message_inv = pack.ComposedType([
         ('invs', pack.ListType(pack.ComposedType([
-            ('type', pack.EnumType(pack.IntType(32), {1: 'tx', 2: 'block'})),
+            ('type', pack.EnumType(pack.IntType(32), {1: 'tx', 2: 'block', 3: 'txlock_request', 4: 'txlock_vote', 5: 'spork', 6: 'masternode_winner', 7: 'masternode_scanning_error', 8: 'unknown'})),
             ('hash', pack.IntType(256)),
         ]))),
     ])
@@ -76,7 +76,7 @@ class Protocol(p2protocol.Protocol):
             elif inv['type'] == 'block':
                 self.factory.new_block.happened(inv['hash'])
             else:
-                print 'Unknown inv type', inv
+                print 'Unneeded inv type', inv
 
     message_getdata = pack.ComposedType([
         ('requests', pack.ListType(pack.ComposedType([
