@@ -1,0 +1,3 @@
+[submodule "dash-subsidy"]
+	path = dash-subsidy
+	url = https://github.com/jakehaas/dash_subsidy.git
