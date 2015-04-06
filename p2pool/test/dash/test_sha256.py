@@ -4,7 +4,7 @@ import unittest
 import hashlib
 import random
 
-from p2pool.bitcoin import sha256
+from p2pool.dash import sha256
 
 class Test(unittest.TestCase):
     def test_all(self):

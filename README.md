@@ -2,32 +2,33 @@ Requirements:
 -------------------------
 Generic:
 
-* dash >=0.11.0.11
-* Python >=2.6
-* Twisted >=10.0.0
-* python-argparse (for Python =2.6)
+* Dashd >=0.11.2.17
+* Python >=2.7
+* Twisted >=13.0.0
+* Zope.interface >=3.8.0
 
 Linux:
 
-    sudo apt-get install python-zope.interface python-twisted python-twisted-web
-    sudo apt-get install python-argparse # if on Python 2.6
+    sudo apt-get install python-zope.interface python-twisted python-twisted-web python-dev
+    sudo apt-get install gcc g++
 
 Install Python modules:
 -------------------------
-xcoin-hash:
+darkcoin_hash:
 
-    cd xcoin-hash
-    rm -rf build
+    git clone https://github.com/vertoe/darkcoin_hash.git
+    cd darkcoin_hash
     python setup.py install
 
-dash-subsidy-python:
+darkcoin_subsidy:
 
-    cd dash-subsidy
+    git clone https://github.com/vertoe/darkcoin_subsidy.git
+    cd darkcoin_subsidy
     python setup.py install
 
 Running P2Pool:
 -------------------------
-To use P2Pool, you must be running your own local dashd. For standard
+To use P2Pool, you must be running your own local darkcoind. For standard
 configurations, using P2Pool should be as simple as:
 
     python run_p2pool.py
@@ -58,3 +59,5 @@ Sponsors:
 Thanks to:
 * The Bitcoin Foundation for its generous support of P2Pool
 * The Litecoin Project for its generous donations to P2Pool
+* The Vertcoin Community for its great contribution to P2Pool
+* vertoe, chaeplin, dstorm and mr.slaveg from the Darkcoin/Dash Community
