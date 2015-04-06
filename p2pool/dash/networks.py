@@ -26,9 +26,9 @@ nets = dict(
             'dashaddress' in (yield dashd.rpc_help()) and
             not (yield dashd.rpc_getinfo())['testnet']
         )),
-        SUBSIDY_FUNC=lambda nBits, height: __import__('darkcoin_subsidy').GetBlockBaseValue(nBits, height),
-        BLOCKHASH_FUNC=lambda data: pack.IntType(256).unpack(__import__('darkcoin_hash').getPoWHash(data)),
-        POW_FUNC=lambda data: pack.IntType(256).unpack(__import__('darkcoin_hash').getPoWHash(data)),
+        SUBSIDY_FUNC=lambda nBits, height: __import__('dash_subsidy').GetBlockBaseValue(nBits, height),
+        BLOCKHASH_FUNC=lambda data: pack.IntType(256).unpack(__import__('x11_hash').getPoWHash(data)),
+        POW_FUNC=lambda data: pack.IntType(256).unpack(__import__('x11_hash').getPoWHash(data)),
         BLOCK_PERIOD=150, # s
         SYMBOL='DASH',
         CONF_FILE_FUNC=lambda: os.path.join(os.path.join(os.environ['APPDATA'], 'Dash') if platform.system() == 'Windows' else os.path.expanduser('~/Library/Application Support/Dash/') if platform.system() == 'Darwin' else os.path.expanduser('~/.dash'), 'dash.conf'),
@@ -49,9 +49,9 @@ nets = dict(
             'dashaddress' in (yield dashd.rpc_help()) and
             (yield dashd.rpc_getinfo())['testnet']
         )),
-        SUBSIDY_FUNC=lambda nBits, height: __import__('darkcoin_subsidy').GetBlockBaseValue_testnet(nBits, height),
-        BLOCKHASH_FUNC=lambda data: pack.IntType(256).unpack(__import__('darkcoin_hash').getPoWHash(data)),
-        POW_FUNC=lambda data: pack.IntType(256).unpack(__import__('darkcoin_hash').getPoWHash(data)),
+        SUBSIDY_FUNC=lambda nBits, height: __import__('dash_subsidy').GetBlockBaseValue_testnet(nBits, height),
+        BLOCKHASH_FUNC=lambda data: pack.IntType(256).unpack(__import__('x11_hash').getPoWHash(data)),
+        POW_FUNC=lambda data: pack.IntType(256).unpack(__import__('x11_hash').getPoWHash(data)),
         BLOCK_PERIOD=150, # s
         SYMBOL='tDASH',
         CONF_FILE_FUNC=lambda: os.path.join(os.path.join(os.environ['APPDATA'], 'Dash') if platform.system() == 'Windows' else os.path.expanduser('~/Library/Application Support/Dash/') if platform.system() == 'Darwin' else os.path.expanduser('~/.dash'), 'dash.conf'),
