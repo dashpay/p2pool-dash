@@ -21,7 +21,7 @@ Download the required submodules:
 
 x11_hash:
 
-    cd x11_hash
+    cd x11-hash
     python setup.py install
 
 dash_subsidy:
