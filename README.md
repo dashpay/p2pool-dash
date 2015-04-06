@@ -21,19 +21,17 @@ Download the required submodules:
 
 x11_hash:
 
-    git clone https://github.com/vertoe/darkcoin_hash.git
-    cd darkcoin_hash
+    cd x11_hash
     python setup.py install
 
 dash_subsidy:
 
-    git clone https://github.com/vertoe/darkcoin_subsidy.git
-    cd darkcoin_subsidy
+    cd dash-subsidy
     python setup.py install
 
 Running P2Pool:
 -------------------------
-To use P2Pool, you must be running your own local darkcoind. For standard
+To use P2Pool, you must be running your own local dashd. For standard
 configurations, using P2Pool should be as simple as:
 
     python run_p2pool.py
@@ -65,4 +63,4 @@ Thanks to:
 * The Bitcoin Foundation for its generous support of P2Pool
 * The Litecoin Project for its generous donations to P2Pool
 * The Vertcoin Community for its great contribution to P2Pool
-* vertoe, chaeplin, dstorm and mr.slaveg from the Darkcoin/Dash Community
+* jakehaas, vertoe, chaeplin, dstorm and mr.slaveg from the Darkcoin/Dash Community
