@@ -14,11 +14,6 @@ Linux:
 
 Install Python modules:
 -------------------------
-Download the required submodules:
-
-    git submodule init
-    git submodule update
-
 x11_hash:
 
     cd x11-hash
