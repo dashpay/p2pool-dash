@@ -2,25 +2,24 @@ Requirements:
 -------------------------
 Generic:
 
-* dash >=0.11.0.11
-* Python >=2.6
-* Twisted >=10.0.0
-* python-argparse (for Python =2.6)
+* Dashd >=0.11.2.17
+* Python >=2.7
+* Twisted >=13.0.0
+* Zope.interface >=3.8.0
 
 Linux:
 
-    sudo apt-get install python-zope.interface python-twisted python-twisted-web
-    sudo apt-get install python-argparse # if on Python 2.6
+    sudo apt-get install python-zope.interface python-twisted python-twisted-web python-dev
+    sudo apt-get install gcc g++
 
 Install Python modules:
 -------------------------
-xcoin-hash:
+x11_hash:
 
-    cd xcoin-hash
-    rm -rf build
+    cd x11-hash
     python setup.py install
 
-dash-subsidy-python:
+dash_subsidy:
 
     cd dash-subsidy
     python setup.py install
@@ -36,7 +35,7 @@ Then run your miner program, connecting to 127.0.0.1 on port 7903 with any
 username and password.
 
 If you are behind a NAT, you should enable TCP port forwarding on your
-router. Forward port 8999 to the host running P2Pool.
+router. Forward port 9998 to the host running P2Pool.
 
 Run for additional options.
 
@@ -58,3 +57,5 @@ Sponsors:
 Thanks to:
 * The Bitcoin Foundation for its generous support of P2Pool
 * The Litecoin Project for its generous donations to P2Pool
+* The Vertcoin Community for its great contribution to P2Pool
+* jakehaas, vertoe, chaeplin, dstorm and mr.slaveg from the Darkcoin/Dash Community

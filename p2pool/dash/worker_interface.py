@@ -8,7 +8,7 @@ import sys
 from twisted.internet import defer
 
 import p2pool
-from p2pool.bitcoin import data as bitcoin_data, getwork
+from p2pool.dash import data as dash_data, getwork
 from p2pool.util import expiring_dict, jsonrpc, pack, variable
 
 class _Provider(object):
@@ -85,7 +85,7 @@ class WorkerInterface(object):
         res = getwork.BlockAttempt(
             version=x['version'],
             previous_block=x['previous_block'],
-            merkle_root=bitcoin_data.check_merkle_link(bitcoin_data.hash256(x['coinb1'] + '\0'*self.worker_bridge.COINBASE_NONCE_LENGTH + x['coinb2']), x['merkle_link']),
+            merkle_root=dash_data.check_merkle_link(dash_data.hash256(x['coinb1'] + '\0'*self.worker_bridge.COINBASE_NONCE_LENGTH + x['coinb2']), x['merkle_link']),
             timestamp=x['timestamp'],
             bits=x['bits'],
             share_target=x['share_target'],

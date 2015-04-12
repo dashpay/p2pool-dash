@@ -4,7 +4,7 @@ Representation of a getwork request/reply
 
 from __future__ import division
 
-from . import data as bitcoin_data
+from . import data as dash_data
 from . import sha256
 from p2pool.util import pack
 
@@ -35,7 +35,7 @@ class BlockAttempt(object):
         if 'data' in extra or 'hash1' in extra or 'target' in extra or 'midstate' in extra:
             raise ValueError()
         
-        block_data = bitcoin_data.block_header_type.pack(dict(
+        block_data = dash_data.block_header_type.pack(dict(
             version=self.version,
             previous_block=self.previous_block,
             merkle_root=self.merkle_root,
@@ -75,4 +75,4 @@ class BlockAttempt(object):
         return self.__class__(**d)
 
 def decode_data(data):
-    return bitcoin_data.block_header_type.unpack(_swap4(data.decode('hex'))[:80])
+    return dash_data.block_header_type.unpack(_swap4(data.decode('hex'))[:80])

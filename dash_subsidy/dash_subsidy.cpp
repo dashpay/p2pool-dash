@@ -2,7 +2,8 @@
 
 static const long long COIN = 100000000;
 
-double ConvertBitsToDouble(unsigned int nBits){
+double ConvertBitsToDouble(unsigned int nBits)
+{
     int nShift = (nBits >> 24) & 0xff;
 
     double dDiff =
@@ -24,8 +25,7 @@ double ConvertBitsToDouble(unsigned int nBits){
 
 long long static GetBlockBaseValue(int nBits, int nHeight, bool fTestNet = false)
 {
-    double dDiff =
-        (double)0x0000ffff / (double)(nBits & 0x00ffffff);
+    double dDiff = (double)0x0000ffff / (double)(nBits & 0x00ffffff);
 
     /* fixed bug caused diff to not be correctly calculated */
     if(nHeight > 4500 || fTestNet) dDiff = ConvertBitsToDouble(nBits);
@@ -48,11 +48,15 @@ long long static GetBlockBaseValue(int nBits, int nHeight, bool fTestNet = false
         if (nSubsidy < 1) nSubsidy = 1;
     }
 
-    // printf("height %u diff %4.2f reward %i \n", nHeight, dDiff, nSubsidy);
+    // LogPrintf("height %u diff %4.2f reward %i \n", nHeight, dDiff, nSubsidy);
     nSubsidy *= COIN;
 
-    // yearly decline of production by 7% per year, projected 21.3M coins max by year 2050.
-    for(int i = 210240; i <= nHeight; i += 210240) nSubsidy *= 0.93;
+    if(fTestNet){
+        for(int i = 46200; i <= nHeight; i += 210240) nSubsidy -= nSubsidy/14;
+    } else {
+        // yearly decline of production by 7.1% per year, projected 21.3M coins max by year 2050.
+        for(int i = 210240; i <= nHeight; i += 210240) nSubsidy -= nSubsidy/14;
+    }
 
     return nSubsidy;
 }

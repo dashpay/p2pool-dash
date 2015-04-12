@@ -1,6 +1,6 @@
 import unittest
 
-from p2pool.bitcoin import getwork, data as bitcoin_data
+from p2pool.dash import getwork, data as dash_data
 
 class Test(unittest.TestCase):
     def test_all(self):
@@ -41,7 +41,7 @@ class Test(unittest.TestCase):
                 0x148135e10208db85abb62754341a392eab1f186aab077a831cf7,
                 0x534ea08be1ab529f484369344b6d5423ef5a0767db9b3ebb4e182bbb67962520,
                 1305759879,
-                bitcoin_data.FloatingInteger.from_target_upper_bound(0x44b9f20000000000000000000000000000000000000000000000),
+                dash_data.FloatingInteger.from_target_upper_bound(0x44b9f20000000000000000000000000000000000000000000000),
                 0x44b9f20000000000000000000000000000000000000000000000,
             ),
             getwork.BlockAttempt(
@@ -49,7 +49,7 @@ class Test(unittest.TestCase):
                 0x148135e10208db85abb62754341a392eab1f186aab077a831cf7,
                 0x534ea08be1ab529f484369344b6d5423ef5a0767db9b3ebb4e182bbb67962520,
                 1305759879,
-                bitcoin_data.FloatingInteger.from_target_upper_bound(0x44b9f20000000000000000000000000000000000000000000000),
+                dash_data.FloatingInteger.from_target_upper_bound(0x44b9f20000000000000000000000000000000000000000000000),
                 432*2**230,
             ),
             getwork.BlockAttempt(
@@ -57,7 +57,7 @@ class Test(unittest.TestCase):
                 0x148135e10208db85abb62754341a392eab1f186aab077a831cf7,
                 0x534ea08be1ab529f484369344b6d5423ef5a0767db9b3ebb4e182bbb67962520,
                 1305759879,
-                bitcoin_data.FloatingInteger.from_target_upper_bound(0x44b9f20000000000000000000000000000000000000000000000),
+                dash_data.FloatingInteger.from_target_upper_bound(0x44b9f20000000000000000000000000000000000000000000000),
                 7*2**240,
             )
         ]
