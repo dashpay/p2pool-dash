@@ -1,4 +1,4 @@
-from p2pool.bitcoin import networks
+from p2pool.dash import networks
 from p2pool.util import math
 
 # CHAIN_LENGTH = number of shares back client keeps
@@ -22,9 +22,9 @@ nets = dict(
         MAX_TARGET=2**256//2**20 - 1,
         PERSIST=True,
         WORKER_PORT=7903,
-        BOOTSTRAP_ADDRS='eu.p2pool.pl p2pool.dashninja.pl dash.p2pools.us darkcoin.fr p2pool.crunchpool.com happymining.de'.split(' '),
-        ANNOUNCE_CHANNEL='#p2pool-drk',
-        VERSION_CHECK=lambda v: v >= 110011,
+        BOOTSTRAP_ADDRS='p2pool.dashninja.pl dash.p2pools.us eu.p2pool.pl p2pool.crunchpool.com happymining.de'.split(' '),
+        ANNOUNCE_CHANNEL='#p2pool-dash',
+        VERSION_CHECK=lambda v: v >= 110217,
     ),
     dash_testnet=math.Object(
         PARENT=networks.nets['dash_testnet'],
@@ -33,14 +33,14 @@ nets = dict(
         REAL_CHAIN_LENGTH=24*60*60//20, # shares
         TARGET_LOOKBEHIND=100, # shares  //with that the pools share diff is adjusting faster, important if huge hashing power comes to the pool
         SPREAD=10, # blocks
-        IDENTIFIER='fa417f64e92d1a3c'.decode('hex'),
-        PREFIX='e6fc75a2eca9f373'.decode('hex'),
+        IDENTIFIER='b6deb1e543fe2427'.decode('hex'),
+        PREFIX='198b644f6821e3b3'.decode('hex'),
         P2P_PORT=18999,
         MIN_TARGET=0,
         MAX_TARGET=2**256//2**20 - 1,
         PERSIST=False,
-        WORKER_PORT=18998,
-        BOOTSTRAP_ADDRS=''.split(' '),
+        WORKER_PORT=17903,
+        BOOTSTRAP_ADDRS='p2pool.dashninja.pl test.p2pool.masternode.io'.split(' '),
         ANNOUNCE_CHANNEL='',
         VERSION_CHECK=lambda v: True,
     ),

@@ -1,14 +1,14 @@
 from twisted.internet import defer, reactor
 from twisted.trial import unittest
 
-from p2pool.bitcoin import data, networks, p2p
+from p2pool.dash import data, networks, p2p
 from p2pool.util import deferral
 
 
 class Test(unittest.TestCase):
     @defer.inlineCallbacks
     def test_get_block(self):
-        factory = p2p.ClientFactory(networks.nets['bitcoin'])
+        factory = p2p.ClientFactory(networks.nets['dash'])
         c = reactor.connectTCP('127.0.0.1', 8333, factory)
         try:
             h = 0x000000000000046acff93b0e76cd10490551bf871ce9ac9fad62e67a07ff1d1e
