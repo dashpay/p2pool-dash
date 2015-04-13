@@ -1,6 +1,6 @@
 import unittest
 
-from p2pool.bitcoin import data, networks
+from p2pool.dash import data, networks
 from p2pool.util import pack
 
 
@@ -41,7 +41,7 @@ class Test(unittest.TestCase):
         ))) == 0xb53802b2333e828d6532059f46ecf6b313a42d79f97925e457fbbfda45367e5c
     
     def test_address_to_pubkey_hash(self):
-        assert data.address_to_pubkey_hash('1KUCp7YP5FP8ViRxhfszSUJCTAajK6viGy', networks.nets['bitcoin']) == pack.IntType(160).unpack('ca975b00a8c203b8692f5a18d92dc5c2d2ebc57b'.decode('hex'))
+        assert data.address_to_pubkey_hash('1KUCp7YP5FP8ViRxhfszSUJCTAajK6viGy', networks.nets['dash']) == pack.IntType(160).unpack('ca975b00a8c203b8692f5a18d92dc5c2d2ebc57b'.decode('hex'))
     
     def test_merkle_hash(self):
         assert data.merkle_hash([
