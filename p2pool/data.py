@@ -174,9 +174,9 @@ class Share(object):
             payee_script = dash_data.pubkey_hash_to_script2(share_data['payee'])
             masternode_tx = [dict(value=masternode_payout, script=payee_script)]
 
-		amounts = dict((script, share_data['subsidy']*(49*weight)//(50*total_weight)) for script, weight in weights.iteritems()) # 98% goes according to weights prior to this share
-		this_script = bitcoin_data.pubkey_hash_to_script2(share_data['pubkey_hash'])
-		amounts[this_script] = amounts.get(this_script, 0) + share_data['subsidy']//50 # 2% goes to block finder
+        amounts = dict((script, share_data['subsidy']*(49*weight)//(50*total_weight)) for script, weight in weights.iteritems()) # 98% goes according to weights prior to this share
+        this_script = dash_data.pubkey_hash_to_script2(share_data['pubkey_hash'])
+        amounts[this_script] = amounts.get(this_script, 0) + share_data['subsidy']//50 # 2% goes to block finder
         amounts[DONATION_SCRIPT] = amounts.get(DONATION_SCRIPT, 0) + worker_payout - sum(amounts.itervalues()) # all that's left over is the donation weight and some extra satoshis due to rounding
         
         if sum(amounts.itervalues()) != worker_payout or any(x < 0 for x in amounts.itervalues()):
