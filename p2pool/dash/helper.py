@@ -14,7 +14,7 @@ def check(dashd, net):
         print >>sys.stderr, "    Check failed! Make sure that you're connected to the right dashd with --dashd-rpc-port!"
         raise deferral.RetrySilentlyException()
     if not net.VERSION_CHECK((yield dashd.rpc_getinfo())['version']):
-        print >>sys.stderr, '    dash version too old! Upgrade to 0.11.2.8 or newer!'
+        print >>sys.stderr, '    dash version too old! Upgrade to 0.11.2.17 or newer!'
         raise deferral.RetrySilentlyException()
 
 @deferral.retry('Error getting work from dashd:', 3)
@@ -36,7 +36,7 @@ def getwork(dashd, net, use_getblocktemplate=False):
             work = yield go()
             end = time.time()
         except jsonrpc.Error_for_code(-32601): # Method not found
-            print >>sys.stderr, 'Error: dash version too old! Upgrade to v0.11.2.8 or newer!'
+            print >>sys.stderr, 'Error: dash version too old! Upgrade to v0.11.2.17 or newer!'
             raise deferral.RetrySilentlyException()
     packed_transactions = [(x['data'] if isinstance(x, dict) else x).decode('hex') for x in work['transactions']]
     packed_votes = [(x['data'] if isinstance(x, dict) else x).decode('hex') for x in work['votes']]

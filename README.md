@@ -40,7 +40,7 @@ Then run your miner program, connecting to 127.0.0.1 on port 7903 with any
 username and password.
 
 If you are behind a NAT, you should enable TCP port forwarding on your
-router. Forward port 8999 to the host running P2Pool.
+router. Forward port 9998 to the host running P2Pool.
 
 Run for additional options.
 
