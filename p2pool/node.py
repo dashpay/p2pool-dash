@@ -309,32 +309,37 @@ class Node(object):
                         break
     
     def get_current_txouts(self):
+	i = 210240
+	real_subsidy = self.dashd_work.value['subsidy']
+	while i <= self.dashd_work.value['height']:
+		real_subsidy = real_subsidy*92.9/100
+		i = i + 210240
 	if self.dashd_work.value['height'] > 158000+((576*30)* 17):
-		real_pay = (self.dashd_work.value['subsidy'])*40/100
+		real_pay = (real_subsidy)*40/100
         elif self.dashd_work.value['height'] > 158000+((576*30)* 15):
-            real_pay = (self.dashd_work.value['subsidy'])*42.5/100
+            real_pay = (real_subsidy)*42.5/100
         elif self.dashd_work.value['height'] > 158000+((576*30)* 13):
-            real_pay = (self.dashd_work.value['subsidy'])*45/100
+            real_pay = (real_subsidy)*45/100
         elif self.dashd_work.value['height'] > 158000+((576*30)* 11):
-            real_pay = (self.dashd_work.value['subsidy'])*47.5/100
+            real_pay = (real_subsidy)*47.5/100
         elif self.dashd_work.value['height'] > 158000+((576*30)* 9):
-            real_pay = (self.dashd_work.value['subsidy'])*50/100
+            real_pay = (real_subsidy)*50/100
         elif self.dashd_work.value['height'] > 158000+((576*30)* 7):
-            real_pay = (self.dashd_work.value['subsidy'])*52.5/100
+            real_pay = (real_subsidy)*52.5/100
         elif self.dashd_work.value['height'] > 158000+((576*30)* 6):
-            real_pay = (self.dashd_work.value['subsidy'])*55/100
+            real_pay = (real_subsidy)*55/100
         elif self.dashd_work.value['height'] > 158000+((576*30)* 5):
-            real_pay = (self.dashd_work.value['subsidy'])*57.5/100
+            real_pay = (real_subsidy)*57.5/100
         elif self.dashd_work.value['height'] > 158000+((576*30)* 4):
-            real_pay = (self.dashd_work.value['subsidy'])*60/100
+            real_pay = (real_subsidy)*60/100
         elif self.dashd_work.value['height'] > 158000+((576*30)* 3):
-            real_pay = (self.dashd_work.value['subsidy'])*62.5/100
+            real_pay = (real_subsidy)*62.5/100
         elif self.dashd_work.value['height'] > 158000+((576*30)* 2):
-            real_pay = (self.dashd_work.value['subsidy'])*65/100
+            real_pay = (real_subsidy)*65/100
         elif self.dashd_work.value['height'] > 158000+((576*30)* 1):
-            real_pay = (self.dashd_work.value['subsidy'])*70/100
+            real_pay = (real_subsidy)*70/100
         else:
-            real_pay = (self.dashd_work.value['subsidy'])*75/100
+            real_pay = (real_subsidy)*75/100
         return p2pool_data.get_expected_payouts(self.tracker, self.best_share_var.value, self.dashd_work.value['bits'].target, real_pay, self.net)
     
     def clean_tracker(self):
