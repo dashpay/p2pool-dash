@@ -309,11 +309,11 @@ class Node(object):
                         break
     
     def get_current_txouts(self):
-	i = 210240
+	#i = 210240
 	real_subsidy = self.dashd_work.value['subsidy']
-	while i <= self.dashd_work.value['height']:
-		real_subsidy = real_subsidy*92.9/100
-		i = i + 210240
+	#while i <= self.dashd_work.value['height']:
+		#real_subsidy = real_subsidy*92.9/100
+		#i = i + 210240
 	if self.dashd_work.value['height'] > 158000+((576*30)* 17):
 		real_pay = (real_subsidy)*40/100
         elif self.dashd_work.value['height'] > 158000+((576*30)* 15):
