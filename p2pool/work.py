@@ -272,7 +272,7 @@ class WorkerBridge(worker_interface.WorkerBridge):
                     coinbase=(script.create_push_script([
                         self.current_work.value['height'],
                         ] + ([mm_data] if mm_data else []) + [
-                    ]) + self.current_work.value['coinbaseflags'])[:100],
+                    ]) + self.current_work.value['coinbaseflags'] + self.node.net.COINBASEEXT)[:100],
                     nonce=random.randrange(2**32),
                     pubkey_hash=pubkey_hash,
                     subsidy=self.current_work.value['subsidy'],
