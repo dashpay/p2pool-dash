@@ -496,6 +496,8 @@ def run():
         ]:
             if getattr(args, var_name) is None and conf_name in contents:
                 setattr(args, var_name, var_type(contents[conf_name]))
+        if 'rpcssl' in contents and contents['rpcssl'] != '0':
+                args.dashd_rpc_ssl = True
         if args.dashd_rpc_password is None:
             parser.error('''dash configuration file didn't contain an rpcpassword= line! Add one!''')
     
