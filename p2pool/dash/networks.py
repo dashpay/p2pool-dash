@@ -26,7 +26,7 @@ nets = dict(
         BLOCK_EXPLORER_URL_PREFIX='http://explorer.dashninja.pl/block/',
         ADDRESS_EXPLORER_URL_PREFIX='http://explorer.dashninja.pl/address/',
         TX_EXPLORER_URL_PREFIX='http://explorer.dashninja.pl/tx/',
-        SANE_TARGET_RANGE=(2**256//2**32//1000000 - 1, 2**256//2**20 - 1),
+        SANE_TARGET_RANGE=(2**256//2**32//1000000 - 1, 2**256//2**27 - 1),
         DUST_THRESHOLD=0.001e8,
     ),
     dash_testnet=math.Object(
