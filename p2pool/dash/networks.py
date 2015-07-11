@@ -4,16 +4,7 @@ import platform
 from twisted.internet import defer
 
 from . import data
-from p2pool.util import math, pack, jsonrpc
-
-@defer.inlineCallbacks
-def check_genesis_block(dashd, genesis_block_hash):
-    try:
-        yield dashd.rpc_getblock(genesis_block_hash)
-    except jsonrpc.Error_for_code(-5):
-        defer.returnValue(False)
-    else:
-        defer.returnValue(True)
+from p2pool.util import math, pack
 
 nets = dict(
     dash=math.Object(
