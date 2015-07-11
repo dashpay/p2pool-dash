@@ -430,6 +430,9 @@ def run():
         type=float, action='store', default=0, dest='worker_fee')
     
     dashd_group = parser.add_argument_group('dashd interface')
+    dashd_group.add_argument('--dashd-config-path', metavar='DASHD_CONFIG_PATH',
+        help='custom configuration file path (when dashd -conf option used)',
+        type=str, action='store', default=None, dest='dashd_config_path')
     dashd_group.add_argument('--dashd-address', metavar='DASHD_ADDRESS',
         help='connect to this address (default: 127.0.0.1)',
         type=str, action='store', default='127.0.0.1', dest='dashd_address')
@@ -467,7 +470,7 @@ def run():
     args.dashd_rpc_username, args.dashd_rpc_password = ([None, None] + args.dashd_rpc_userpass)[-2:]
     
     if args.dashd_rpc_password is None:
-        conf_path = net.PARENT.CONF_FILE_FUNC()
+        conf_path = args.dashd_config_path or net.PARENT.CONF_FILE_FUNC()
         if not os.path.exists(conf_path):
             parser.error('''dash configuration file not found. Manually enter your RPC password.\r\n'''
                 '''If you actually haven't created a configuration file, you should create one at %s with the text:\r\n'''
