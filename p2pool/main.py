@@ -25,6 +25,53 @@ from util import fixargparse, jsonrpc, variable, deferral, math, logging, switch
 from . import networks, web, work
 import p2pool, p2pool.data as p2pool_data, p2pool.node as p2pool_node
 
+class keypool():
+    keys = []
+    keyweights = []
+    stamp = time.time()
+    payouttotal = 0.0
+
+    def addkey(self, n):
+        self.keys.append(n)
+        self.keyweights.append(random.uniform(0,100.0))
+    def delkey(self, n):
+        try:
+            i=self.keys.index(n)
+            self.keys.pop(i)
+            self.keyweights.pop(i)
+        except:
+            pass
+
+    def weighted(self):
+        choice=random.uniform(0,sum(self.keyweights))
+        tot = 0.0
+        ind = 0
+        for i in (self.keyweights):
+            tot += i
+            if tot >= choice:
+                return ind
+            ind += 1
+        return ind
+
+    def popleft(self):
+        if (len(self.keys) > 0):
+            dummyval=self.keys.pop(0)
+        if (len(self.keyweights) > 0):
+            dummyval=self.keyweights.pop(0)
+
+    def updatestamp(self, n):
+        self.stamp = n
+
+    def paytotal(self):
+        self.payouttotal = 0.0
+        for i in range(len(pubkeys.keys)):
+            self.payouttotal += node.get_current_txouts().get(dash_data.pubkey_hash_to_script2(pubkeys.keys[i]), 0)*1e-8
+        return self.payouttotal
+
+    def getpaytotal(self):
+        return self.payouttotal
+
+
 @defer.inlineCallbacks
 def main(args, net, datadir_path, merged_urls, worker_endpoint):
     try:
@@ -72,7 +119,8 @@ def main(args, net, datadir_path, merged_urls, worker_endpoint):
             factory = yield connect_p2p()
         
         print 'Determining payout address...'
-        if args.pubkey_hash is None:
+        pubkeys = keypool()
+        if args.pubkey_hash is None and args.address != 'dynamic':
             address_path = os.path.join(datadir_path, 'cached_payout_address')
             
             if os.path.exists(address_path):
@@ -96,10 +144,77 @@ def main(args, net, datadir_path, merged_urls, worker_endpoint):
                 f.write(address)
             
             my_pubkey_hash = dash_data.address_to_pubkey_hash(address, net.PARENT)
-        else:
+            print '    ...success! Payout address:', dash_data.pubkey_hash_to_address(my_pubkey_hash, net.PARENT)
+            print
+            pubkeys.addkey(my_pubkey_hash)
+        elif args.address != 'dynamic':
             my_pubkey_hash = args.pubkey_hash
-        print '    ...success! Payout address:', dash_data.pubkey_hash_to_address(my_pubkey_hash, net.PARENT)
-        print
+            print '    ...success! Payout address:', dash_data.pubkey_hash_to_address(my_pubkey_hash, net.PARENT)
+            print
+            pubkeys.addkey(my_pubkey_hash)
+        else:
+            print '    Entering dynamic address mode.'
+
+            if args.numaddresses < 2:
+                print ' ERROR: Can not use fewer than 2 addresses in dynamic mode. Resetting to 2.'
+                args.numaddresses = 2
+                keys = []
+                keyweights = []
+                stamp = time.time()
+                payouttotal = 0.0
+
+                def addkey(self, n):
+                    self.keys.append(n)
+                    self.keyweights.append(random.uniform(0,100.0))
+                def delkey(self, n):
+                    try:
+                        i=self.keys.index(n)
+                        self.keys.pop(i)
+                        self.keyweights.pop(i)
+                    except:
+                        pass
+
+                def weighted(self):
+                    choice=random.uniform(0,sum(self.keyweights))
+                    tot = 0.0
+                    ind = 0
+                    for i in (self.keyweights):
+                        tot += i
+                        if tot >= choice:
+                            return ind
+                        ind += 1
+                    return ind
+
+                def popleft(self):
+                    if (len(self.keys) > 0):
+                        dummyval=self.keys.pop(0)
+                    if (len(self.keyweights) > 0):
+                        dummyval=self.keyweights.pop(0)
+
+                def updatestamp(self, n):
+                    self.stamp = n
+
+                def paytotal(self):
+                    self.payouttotal = 0.0
+                    for i in range(len(pubkeys.keys)):
+                        self.payouttotal += node.get_current_txouts().get(dash_data.pubkey_hash_to_script2(pubkeys.keys[i]), 0)*1e-8
+                    return self.payouttotal
+
+                def getpaytotal(self):
+                    return self.payouttotal
+
+            pubkeys = keypool()
+            for i in range(args.numaddresses):
+                address = yield deferral.retry('Error getting a dynamic address from dashd:', 5)(lambda: dashd.rpc_getnewaddress('p2pool'))()
+                new_pubkey = dash_data.address_to_pubkey_hash(address, net.PARENT)
+                pubkeys.addkey(new_pubkey)
+
+            pubkeys.updatestamp(time.time())
+
+            my_pubkey_hash = pubkeys.keys[0]
+
+            for i in range(len(pubkeys.keys)):
+                print '    ...payout %d: %s' % (i, dash_data.pubkey_hash_to_address(pubkeys.keys[i], net.PARENT),)
         
         print "Loading shares..."
         shares = {}
@@ -211,10 +326,10 @@ def main(args, net, datadir_path, merged_urls, worker_endpoint):
         
         print 'Listening for workers on %r port %i...' % (worker_endpoint[0], worker_endpoint[1])
         
-        wb = work.WorkerBridge(node, my_pubkey_hash, args.donation_percentage, merged_urls, args.worker_fee)
+        wb = work.WorkerBridge(node, my_pubkey_hash, args.donation_percentage, merged_urls, args.worker_fee, args, pubkeys, dashd)
         web_root = web.get_web_root(wb, datadir_path, dashd_getinfo_var)
         caching_wb = worker_interface.CachingWorkerBridge(wb)
-        worker_interface.WorkerInterface(caching_wb).attach_to(web_root, get_handler=lambda request: request.redirect('static/'))
+        worker_interface.WorkerInterface(caching_wb).attach_to(web_root, get_handler=lambda request: request.redirect('/static/'))
         web_serverfactory = server.Site(web_root)
         
         
@@ -323,11 +438,18 @@ def main(args, net, datadir_path, merged_urls, worker_endpoint):
                         stale_prop = p2pool_data.get_average_stale_prop(node.tracker, node.best_share_var.value, min(60*60//net.SHARE_PERIOD, height))
                         real_att_s = p2pool_data.get_pool_attempts_per_second(node.tracker, node.best_share_var.value, min(height - 1, 60*60//net.SHARE_PERIOD)) / (1 - stale_prop)
                         
-                        this_str += '\n Shares: %i (%i orphan, %i dead) Stale rate: %s Efficiency: %s Current payout: %.4f %s' % (
+                        paystr = ''
+                        paytot = 0.0
+                        for i in range(len(pubkeys.keys)):
+                            curtot = node.get_current_txouts().get(dash_data.pubkey_hash_to_script2(pubkeys.keys[i]), 0)
+                            paytot += curtot*1e-8
+                            paystr += "(%.4f)" % (curtot*1e-8,)
+                        paystr += "=%.4f" % (paytot,)
+                        this_str += '\n Shares: %i (%i orphan, %i dead) Stale rate: %s Efficiency: %s Current payout: %s %s' % (
                             shares, stale_orphan_shares, stale_doa_shares,
                             math.format_binomial_conf(stale_orphan_shares + stale_doa_shares, shares, 0.95),
                             math.format_binomial_conf(stale_orphan_shares + stale_doa_shares, shares, 0.95, lambda x: (1 - x)/(1 - stale_prop)),
-                            node.get_current_txouts().get(dash_data.pubkey_hash_to_script2(my_pubkey_hash), 0)*1e-8, net.PARENT.SYMBOL,
+                            paystr, net.PARENT.SYMBOL,
                         )
                         this_str += '\n Pool: %sH/s Stale rate: %.1f%% Expected time to block: %s' % (
                             math.format(int(real_att_s)),
@@ -374,8 +496,14 @@ def run():
         help='enable debugging mode',
         action='store_const', const=True, default=False, dest='debug')
     parser.add_argument('-a', '--address',
-        help='generate payouts to this address (default: <address requested from dashd>)',
+        help='generate payouts to this address (default: <address requested from dashd>), or (dynamic)',
         type=str, action='store', default=None, dest='address')
+    parser.add_argument('-i', '--numaddresses',
+        help='number of dash auto-generated addresses to maintain for getwork dynamic address allocation',
+        type=int, action='store', default=2, dest='numaddresses')
+    parser.add_argument('-t', '--timeaddresses',
+        help='seconds between acquisition of new address and removal of single old (default: 2 days or 172800s)',
+        type=int, action='store', default=172800, dest='timeaddresses')
     parser.add_argument('--datadir',
         help='store data in this directory (default: <directory run_p2pool.py is in>/data)',
         type=str, action='store', default=None, dest='datadir')
@@ -430,6 +558,9 @@ def run():
         type=float, action='store', default=0, dest='worker_fee')
     
     dashd_group = parser.add_argument_group('dashd interface')
+    dashd_group.add_argument('--dashd-config-path', metavar='DASHD_CONFIG_PATH',
+        help='custom configuration file path (when dashd -conf option used)',
+        type=str, action='store', default=None, dest='dashd_config_path')
     dashd_group.add_argument('--dashd-address', metavar='DASHD_ADDRESS',
         help='connect to this address (default: 127.0.0.1)',
         type=str, action='store', default='127.0.0.1', dest='dashd_address')
@@ -467,7 +598,7 @@ def run():
     args.dashd_rpc_username, args.dashd_rpc_password = ([None, None] + args.dashd_rpc_userpass)[-2:]
     
     if args.dashd_rpc_password is None:
-        conf_path = net.PARENT.CONF_FILE_FUNC()
+        conf_path = args.dashd_config_path or net.PARENT.CONF_FILE_FUNC()
         if not os.path.exists(conf_path):
             parser.error('''dash configuration file not found. Manually enter your RPC password.\r\n'''
                 '''If you actually haven't created a configuration file, you should create one at %s with the text:\r\n'''
@@ -493,6 +624,8 @@ def run():
         ]:
             if getattr(args, var_name) is None and conf_name in contents:
                 setattr(args, var_name, var_type(contents[conf_name]))
+        if 'rpcssl' in contents and contents['rpcssl'] != '0':
+                args.dashd_rpc_ssl = True
         if args.dashd_rpc_password is None:
             parser.error('''dash configuration file didn't contain an rpcpassword= line! Add one!''')
     
@@ -519,7 +652,7 @@ def run():
         addr, port = args.worker_endpoint.rsplit(':', 1)
         worker_endpoint = addr, int(port)
     
-    if args.address is not None:
+    if args.address is not None and args.address != 'dynamic':
         try:
             args.pubkey_hash = dash_data.address_to_pubkey_hash(args.address, net.PARENT)
         except Exception, e:
