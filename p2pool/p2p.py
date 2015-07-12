@@ -25,7 +25,7 @@ def fragment(f, **kwargs):
         fragment(f, **dict((k, v[len(v)//2:]) for k, v in kwargs.iteritems()))
 
 class Protocol(p2protocol.Protocol):
-    VERSION = 1300
+    VERSION = 1400
     
     max_remembered_txs_size = 2500000
     
@@ -144,7 +144,7 @@ class Protocol(p2protocol.Protocol):
     def handle_version(self, version, services, addr_to, addr_from, nonce, sub_version, mode, best_share_hash):
         if self.other_version is not None:
             raise PeerMisbehavingError('more than one version message')
-        if version < 1300:
+        if version < 1400:
             raise PeerMisbehavingError('peer too old')
         
         self.other_version = version
