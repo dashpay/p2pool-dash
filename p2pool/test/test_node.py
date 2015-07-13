@@ -87,7 +87,7 @@ class dashd(object): # can be used as p2p factory, p2p protocol, or rpc jsonrpc 
                 fee=fee,
             ))
         return {
-            "version" : 2,
+            "version" : 3,
             "previousblockhash" : '%064x' % (self.blocks[-1],),
             "transactions" : txs,
             "coinbaseaux" : {
