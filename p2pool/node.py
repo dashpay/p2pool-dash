@@ -273,7 +273,7 @@ class Node(object):
                 return
             helper.submit_block(block, True, self.factory, self.dashd, self.dashd_work, self.net)
             print
-            print 'GOT BLOCK %i FROM PEER! Passing to dashd! %s dash: %s%064x' % (self.dashd_work.value['height'],p2pool_data.format_hash(share.hash), self.net.PARENT.BLOCK_EXPLORER_URL_PREFIX, share.header_hash)
+            print 'GOT BLOCK FROM PEER! Passing to dashd! %s dash: %s%064x' % (p2pool_data.format_hash(share.hash), self.net.PARENT.BLOCK_EXPLORER_URL_PREFIX, share.header_hash)
             print
         
         def forget_old_txs():
