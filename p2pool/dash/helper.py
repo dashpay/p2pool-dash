@@ -87,33 +87,6 @@ def submit_block_rpc(block, ignore_failure, dashd, dashd_work, net):
     if (not success and success_expected and not ignore_failure) or (success and not success_expected):
         print >>sys.stderr, 'Block submittal result: %s (%r) Expected: %s' % (success, result, success_expected)
 
-@deferral.retry('Error submitting primary block: (will retry)', 10, 10)
-def submit_block_p2p_old(block, factory, net):
-    if factory.conn.value is None:
-        print >>sys.stderr, 'No dashd connection when block submittal attempted! %s%064x' % (net.PARENT.BLOCK_EXPLORER_URL_PREFIX, dash_data.hash256(dash_data.block_header_type.pack(block['header'])))
-        raise deferral.RetrySilentlyException()
-    factory.conn.value.send_block_old(block=block)
-
-@deferral.retry('Error submitting block: (will retry)', 10, 10)
-@defer.inlineCallbacks
-def submit_block_rpc_old(block, ignore_failure, dashd, dashd_work, net):
-    if dashd_work.value['use_getblocktemplate']:
-        try:
-            result = yield dashd.rpc_submitblock(dash_data.block_type_old.pack(block).encode('hex'))
-        except jsonrpc.Error_for_code(-32601): # Method not found, for older litecoin versions
-            result = yield dashd.rpc_getblocktemplate(dict(mode='submit', data=dash_data.block_type_old.pack(block).encode('hex')))
-        success = result is None
-    else:
-        result = yield dashd.rpc_getmemorypool(dash_data.block_type_old.pack(block).encode('hex'))
-        success = result
-    success_expected = net.PARENT.POW_FUNC(dash_data.block_header_type.pack(block['header'])) <= block['header']['bits'].target
-    if (not success and success_expected and not ignore_failure) or (success and not success_expected):
-        print >>sys.stderr, 'Block submittal result: %s (%r) Expected: %s' % (success, result, success_expected)
-
 def submit_block(block, ignore_failure, factory, dashd, dashd_work, net):
-    if dashd_work.value['masternode_payments']:
-        submit_block_p2p(block, factory, net)
-        submit_block_rpc(block, ignore_failure, dashd, dashd_work, net)
-    else:
-        submit_block_p2p_old(block, factory, net)
-        submit_block_rpc_old(block, ignore_failure, dashd, dashd_work, net)
+    submit_block_p2p(block, factory, net)
+    submit_block_rpc(block, ignore_failure, dashd, dashd_work, net)

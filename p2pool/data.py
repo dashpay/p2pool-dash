@@ -48,12 +48,12 @@ def load_share(share, net, peer_addr):
         return Share(net, peer_addr, Share.share_type.unpack(share['contents']))
     else:
         raise ValueError('unknown share type: %r' % (share['type'],))
-
-DONATION_SCRIPT = '41042d71f6448f92c35ede838e3922313b162cbf20d357e7d067115aac8d1a27f66a89b46dee086775c8b083ee5f06fe1c08d1d0ae0668d029aed17e1f8eaea544d4ac'.decode('hex')
+# XqPQ26xGigKkq4yCNmTfgkRPdt8FyB547J => it`s eduffield address
+DONATION_SCRIPT = '41047559d13c3f81b1fadbd8dd03e4b5a1c73b05e2b980e00d467aa9440b29c7de23664dde6428d75cafed22ae4f0d302e26c5c5a5dd4d3e1b796d7281bdc9430f35ac'.decode('hex')
 
 class Share(object):
-    VERSION = 13
-    VOTING_VERSION = 13
+    VERSION = 14
+    VOTING_VERSION = 14
     SUCCESSOR = None
     
     small_block_header_type = pack.ComposedType([
@@ -173,10 +173,10 @@ class Share(object):
             worker_payout -= masternode_payout
             payee_script = dash_data.pubkey_hash_to_script2(share_data['payee'])
             masternode_tx = [dict(value=masternode_payout, script=payee_script)]
-        
-        amounts = dict((script, worker_payout*(199*weight)//(200*total_weight)) for script, weight in weights.iteritems()) # 99.5% goes according to weights prior to this share
+
+        amounts = dict((script, worker_payout*(49*weight)//(50*total_weight)) for script, weight in weights.iteritems()) # 98% goes according to weights prior to this share
         this_script = dash_data.pubkey_hash_to_script2(share_data['pubkey_hash'])
-        amounts[this_script] = amounts.get(this_script, 0) + worker_payout//200 # 0.5% goes to block finder
+        amounts[this_script] = amounts.get(this_script, 0) + worker_payout//50 # 2% goes to block finder
         amounts[DONATION_SCRIPT] = amounts.get(DONATION_SCRIPT, 0) + worker_payout - sum(amounts.itervalues()) # all that's left over is the donation weight and some extra satoshis due to rounding
         
         if sum(amounts.itervalues()) != worker_payout or any(x < 0 for x in amounts.itervalues()):

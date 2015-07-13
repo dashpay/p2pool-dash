@@ -4,16 +4,7 @@ import platform
 from twisted.internet import defer
 
 from . import data
-from p2pool.util import math, pack, jsonrpc
-
-@defer.inlineCallbacks
-def check_genesis_block(dashd, genesis_block_hash):
-    try:
-        yield dashd.rpc_getblock(genesis_block_hash)
-    except jsonrpc.Error_for_code(-5):
-        defer.returnValue(False)
-    else:
-        defer.returnValue(True)
+from p2pool.util import math, pack
 
 nets = dict(
     dash=math.Object(
@@ -35,8 +26,7 @@ nets = dict(
         BLOCK_EXPLORER_URL_PREFIX='http://explorer.dashninja.pl/block/',
         ADDRESS_EXPLORER_URL_PREFIX='http://explorer.dashninja.pl/address/',
         TX_EXPLORER_URL_PREFIX='http://explorer.dashninja.pl/tx/',
-        SANE_TARGET_RANGE=(2**256//2**32//1000 - 1, 2**256//2**20 - 1),
-        DUMB_SCRYPT_DIFF=1,
+        SANE_TARGET_RANGE=(2**256//2**32//1000000 - 1, 2**256//2**26 - 1),
         DUST_THRESHOLD=0.001e8,
     ),
     dash_testnet=math.Object(
@@ -58,8 +48,7 @@ nets = dict(
         BLOCK_EXPLORER_URL_PREFIX='http://test.explorer.dashninja.pl/block/',
         ADDRESS_EXPLORER_URL_PREFIX='http://test.explorer.dashninja.pl/address/',
         TX_EXPLORER_URL_PREFIX='http://test.explorer.dashninja.pl/tx/',
-        SANE_TARGET_RANGE=(2**256//2**32//1000 - 1, 2**256//2**20 - 1),
-        DUMB_SCRYPT_DIFF=1,
+        SANE_TARGET_RANGE=(2**256//2**32//1000000 - 1, 2**256//2**20 - 1),
         DUST_THRESHOLD=0.001e8,
     ),
 )

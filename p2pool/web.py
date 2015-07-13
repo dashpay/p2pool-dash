@@ -223,6 +223,7 @@ def get_web_root(wb, datadir_path, dashd_getinfo_var, stop_event=variable.Event(
     ))))
     web_root.putChild('peer_versions', WebInterface(lambda: dict(('%s:%i' % peer.addr, peer.other_sub_version) for peer in node.p2p_node.peers.itervalues())))
     web_root.putChild('payout_addr', WebInterface(lambda: dash_data.pubkey_hash_to_address(wb.my_pubkey_hash, node.net.PARENT)))
+    web_root.putChild('payout_addrs', WebInterface(lambda: list(('%s' % dash_data.pubkey_hash_to_address(add, node.net.PARENT)) for add in wb.pubkeys.keys)))
     def height_from_coinbase(coinbase):
         opcode = ord(coinbase[0]) if len(coinbase) > 0 else 0
         if opcode >= 1 and opcode <= 75: 
@@ -266,6 +267,9 @@ def get_web_root(wb, datadir_path, dashd_getinfo_var, stop_event=variable.Event(
         global_stale_prop = p2pool_data.get_average_stale_prop(node.tracker, node.best_share_var.value, lookbehind)
         (stale_orphan_shares, stale_doa_shares), shares, _ = wb.get_stale_counts()
         miner_hash_rates, miner_dead_hash_rates = wb.get_local_rates()
+        my_current_payout=0.0
+        for add in wb.pubkeys.keys:
+            my_current_payout+=node.get_current_txouts().get(dash_data.pubkey_hash_to_script2(add), 0)*1e-8
         
         stat_log.append(dict(
             time=time.time(),
@@ -276,7 +280,7 @@ def get_web_root(wb, datadir_path, dashd_getinfo_var, stop_event=variable.Event(
             shares=shares,
             stale_shares=stale_orphan_shares + stale_doa_shares,
             stale_shares_breakdown=dict(orphan=stale_orphan_shares, doa=stale_doa_shares),
-            current_payout=node.get_current_txouts().get(dash_data.pubkey_hash_to_script2(wb.my_pubkey_hash), 0)*1e-8,
+            current_payout=my_current_payout,
             peers=dict(
                 incoming=sum(1 for peer in node.p2p_node.peers.itervalues() if peer.incoming),
                 outgoing=sum(1 for peer in node.p2p_node.peers.itervalues() if not peer.incoming),
@@ -349,7 +353,7 @@ def get_web_root(wb, datadir_path, dashd_getinfo_var, stop_event=variable.Event(
         if int(share_hash_str, 16) not in node.tracker.items:
             return ''
         share = node.tracker.items[int(share_hash_str, 16)]
-        return p2pool_data.share_type.pack(share.as_share1a())
+        return p2pool_data.share_type.pack(share.as_share())
     new_root.putChild('share_data', WebInterface(lambda share_hash_str: get_share_data(share_hash_str), 'application/octet-stream'))
     new_root.putChild('currency_info', WebInterface(lambda: dict(
         symbol=node.net.PARENT.SYMBOL,
@@ -438,7 +442,10 @@ def get_web_root(wb, datadir_path, dashd_getinfo_var, stop_event=variable.Event(
         hd.datastreams['pool_rates'].add_datum(t, pool_rates)
         
         current_txouts = node.get_current_txouts()
-        hd.datastreams['current_payout'].add_datum(t, current_txouts.get(dash_data.pubkey_hash_to_script2(wb.my_pubkey_hash), 0)*1e-8)
+        my_current_payouts = 0.0
+        for add in wb.pubkeys.keys:
+             my_current_payouts += current_txouts.get(dash_data.pubkey_hash_to_script2(add), 0)*1e-8
+        hd.datastreams['current_payout'].add_datum(t, my_current_payouts)
         miner_hash_rates, miner_dead_hash_rates = wb.get_local_rates()
         current_txouts_by_address = dict((dash_data.script2_to_address(script, node.net.PARENT), amount) for script, amount in current_txouts.iteritems())
         hd.datastreams['current_payouts'].add_datum(t, dict((user, current_txouts_by_address[user]*1e-8) for user in miner_hash_rates if user in current_txouts_by_address))

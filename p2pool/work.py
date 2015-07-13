@@ -1,4 +1,5 @@
 from __future__ import division
+from collections import deque
 
 import base64
 import random
@@ -14,17 +15,25 @@ from dash import helper, script, worker_interface
 from util import forest, jsonrpc, variable, deferral, math, pack
 import p2pool, p2pool.data as p2pool_data
 
+print_throttle = 0.0
+
 class WorkerBridge(worker_interface.WorkerBridge):
     COINBASE_NONCE_LENGTH = 8
 
-    def __init__(self, node, my_pubkey_hash, donation_percentage, merged_urls, worker_fee):
+    def __init__(self, node, my_pubkey_hash, donation_percentage, merged_urls, worker_fee, args, pubkeys, dashd):
         worker_interface.WorkerBridge.__init__(self)
         self.recent_shares_ts_work = []
 
         self.node = node
+
+        self.dashd = dashd
+        self.pubkeys = pubkeys
+        self.args = args
         self.my_pubkey_hash = my_pubkey_hash
-        self.donation_percentage = donation_percentage
-        self.worker_fee = worker_fee
+		
+        self.donation_percentage = args.donation_percentage
+        self.worker_fee = args.worker_fee
+
 
         self.net = self.node.net.PARENT
         self.running = True
@@ -40,6 +49,8 @@ class WorkerBridge(worker_interface.WorkerBridge):
 
         self.my_share_hashes = set()
         self.my_doa_share_hashes = set()
+
+        self.address_throttle = 0
 
         self.tracker_view = forest.TrackerView(self.node.tracker, forest.get_attributedelta_type(dict(forest.AttributeDelta.attrs,
             my_count=lambda share: 1 if share.hash in self.my_share_hashes else 0,
@@ -139,6 +150,23 @@ class WorkerBridge(worker_interface.WorkerBridge):
 
         return (my_shares_not_in_chain - my_doa_shares_not_in_chain, my_doa_shares_not_in_chain), my_shares, (orphans_recorded_in_chain, doas_recorded_in_chain)
 
+    @defer.inlineCallbacks
+    def freshen_addresses(self, c):
+        self.cur_address_throttle = time.time()
+        if self.cur_address_throttle - self.address_throttle < 30:
+            return
+        self.address_throttle=time.time()
+        print "ATTEMPTING TO FRESHEN ADDRESS."
+        self.address = yield deferral.retry('Error getting a dynamic address from dashd:', 5)(lambda: self.dashd.rpc_getnewaddress('p2pool'))()
+        new_pubkey = dash_data.address_to_pubkey_hash(self.address, self.net)
+        self.pubkeys.popleft()
+        self.pubkeys.addkey(new_pubkey)
+        print " Updated payout pool:"
+        for i in range(len(self.pubkeys.keys)):
+            print '    ...payout %d: %s(%f)' % (i, dash_data.pubkey_hash_to_address(self.pubkeys.keys[i], self.net),self.pubkeys.keyweights[i],)
+        self.pubkeys.updatestamp(c)
+        print " Next address rotation in : %fs" % (time.time()-c+self.args.timeaddresses)
+
     def get_user_details(self, username):
         contents = re.split('([+/])', username)
         assert len(contents) % 2 == 1
@@ -159,7 +187,15 @@ class WorkerBridge(worker_interface.WorkerBridge):
                     desired_share_target = dash_data.difficulty_to_target(float(parameter))
                 except:
                     if p2pool.DEBUG:
-                        log.err()
+                        log.err()        
+
+        if self.args.address == 'dynamic':
+            i = self.pubkeys.weighted()
+            pubkey_hash = self.pubkeys.keys[i]
+
+            c = time.time()
+            if (c - self.pubkeys.stamp) > self.args.timeaddresses:
+                self.freshen_addresses(c)
 
         if random.uniform(0, 100) < self.worker_fee:
             pubkey_hash = self.my_pubkey_hash
@@ -167,7 +203,8 @@ class WorkerBridge(worker_interface.WorkerBridge):
             try:
                 pubkey_hash = dash_data.address_to_pubkey_hash(user, self.node.net.PARENT)
             except: # XXX blah
-                pubkey_hash = self.my_pubkey_hash
+                if self.args.address != 'dynamic':
+                    pubkey_hash = self.my_pubkey_hash
 
         return user, pubkey_hash, desired_share_target, desired_pseudoshare_target
 
@@ -204,6 +241,9 @@ class WorkerBridge(worker_interface.WorkerBridge):
         return addr_hash_rates
 
     def get_work(self, pubkey_hash, desired_share_target, desired_pseudoshare_target):
+        global print_throttle
+        if (self.node.p2p_node is None or len(self.node.p2p_node.peers) == 0) and self.node.net.PERSIST:
+            raise jsonrpc.Error_for_code(-12345)(u'p2pool is not connected to any peers')
         if self.node.best_share_var.value is None and self.node.net.PERSIST:
             raise jsonrpc.Error_for_code(-12345)(u'p2pool is downloading shares')
 
@@ -239,7 +279,6 @@ class WorkerBridge(worker_interface.WorkerBridge):
                 upgraded = counts.get(successor_type.VERSION, 0)/sum(counts.itervalues())
                 if upgraded > .65:
                     print 'Switchover imminent. Upgraded: %.3f%% Threshold: %.3f%%' % (upgraded*100, 95)
-                print
                 # Share -> NewShare only valid if 95% of hashes in [net.CHAIN_LENGTH*9//10, net.CHAIN_LENGTH] for new version
                 if counts.get(successor_type.VERSION, 0) > sum(counts.itervalues())*95//100:
                     share_type = successor_type
@@ -272,7 +311,7 @@ class WorkerBridge(worker_interface.WorkerBridge):
                     coinbase=(script.create_push_script([
                         self.current_work.value['height'],
                         ] + ([mm_data] if mm_data else []) + [
-                    ]) + self.current_work.value['coinbaseflags'])[:100],
+                    ]) + self.current_work.value['coinbaseflags'] + self.node.net.COINBASEEXT)[:100],
                     nonce=random.randrange(2**32),
                     pubkey_hash=pubkey_hash,
                     subsidy=self.current_work.value['subsidy'],
@@ -318,12 +357,18 @@ class WorkerBridge(worker_interface.WorkerBridge):
         lp_count = self.new_work_event.times
         merkle_link = dash_data.calculate_merkle_link([None] + other_transaction_hashes, 0)
 
-        print 'New work for worker! Difficulty: %.06f Share difficulty: %.06f Total block value: %.6f %s including %i transactions' % (
-            dash_data.target_to_difficulty(target),
-            dash_data.target_to_difficulty(share_info['bits'].target),
-            self.current_work.value['subsidy']*1e-8, self.node.net.PARENT.SYMBOL,
-            len(self.current_work.value['transactions']),
-        )
+        if print_throttle is 0.0:
+            print_throttle = time.time()
+        else:
+            current_time = time.time()
+            if (current_time - print_throttle) > 5.0:
+                print 'New work for worker! Difficulty: %.06f Share difficulty: %.06f Total block value: %.6f %s including %i transactions' % (
+                    dash_data.target_to_difficulty(target),
+                    dash_data.target_to_difficulty(share_info['bits'].target),
+                    self.current_work.value['subsidy']*1e-8, self.node.net.PARENT.SYMBOL,
+                    len(self.current_work.value['transactions']),
+                )
+                print_throttle = time.time()
 
         #need this for stats
         self.last_work_shares.value[dash_data.pubkey_hash_to_address(pubkey_hash, self.node.net.PARENT)]=share_info['bits']
