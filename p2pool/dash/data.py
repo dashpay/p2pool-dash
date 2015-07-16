@@ -291,11 +291,7 @@ def pubkey_hash_script_to_script2(pubkey_hash):
 
 # Create Script from Human Address
 def address_to_script2(address, net):
-    if address == '':
-        raise ValueError('address is Empty!')
-    print 'address_to_script2 [%s]' % (address,)
     x = human_address_type.unpack(base58_decode(address))
-    print 'address %d %s' % (x['version'],x['pubkey_hash'],) 
     if x['version'] == net.ADDRESS_VERSION:
         return pubkey_hash_to_script2(x['pubkey_hash'])
     if x['version'] == net.SCRIPT_ADDRESS_VERSION:
