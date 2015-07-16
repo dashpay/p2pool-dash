@@ -110,7 +110,7 @@ class Share(object):
     gentx_before_refhash = pack.VarStrType().pack(DONATION_SCRIPT) + pack.IntType(64).pack(0) + pack.VarStrType().pack('\x6a\x28' + pack.IntType(256).pack(0) + pack.IntType(64).pack(0))[:3]
     
     @classmethod
-    def generate_transaction(cls, tracker, share_data, block_target, desired_timestamp, desired_target, ref_merkle_link, desired_other_transaction_hashes_and_fees, net, known_txs=None, last_txout_nonce=0, base_subsidy=None):
+    def generate_transaction(cls, tracker, share_data, block_target, desired_timestamp, desired_target, ref_merkle_link, desired_other_transaction_hashes_and_fees, net, known_txs=None, last_txout_nonce=0, base_subsidy=None, payee_address=None):
         previous_share = tracker.items[share_data['previous_share_hash']] if share_data['previous_share_hash'] is not None else None
         
         height, last = tracker.get_height_and_last(share_data['previous_share_hash'])
@@ -171,7 +171,10 @@ class Share(object):
         if share_data['payee'] is not None:
             masternode_payout = share_data['payee_amount']
             worker_payout -= masternode_payout
-            payee_script = dash_data.pubkey_hash_to_script2(share_data['payee'])
+            if payee_address is not None:
+                payee_script = dash_data.address_to_script2(payee_address,net.PARENT)
+            else:
+                payee_script = dash_data.pubkey_hash_to_script2(share_data['payee'])
             masternode_tx = [dict(value=masternode_payout, script=payee_script)]
 
         amounts = dict((script, worker_payout*(49*weight)//(50*total_weight)) for script, weight in weights.iteritems()) # 98% goes according to weights prior to this share

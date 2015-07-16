@@ -115,6 +115,7 @@ class WorkerBridge(worker_interface.WorkerBridge):
                     subsidy=self.node.net.PARENT.SUBSIDY_FUNC(self.node.dashd_work.value['bits'].bits, self.node.dashd_work.value['height']),
                     last_update=self.node.dashd_work.value['last_update'],
                     payee=self.node.dashd_work.value['payee'],
+                    payee_address=self.node.dashd_work.value['payee_address'],
                     payee_amount=self.node.dashd_work.value['payee_amount'],
                 )
 
@@ -333,6 +334,7 @@ class WorkerBridge(worker_interface.WorkerBridge):
                 net=self.node.net,
                 known_txs=tx_map,
                 base_subsidy=self.node.net.PARENT.SUBSIDY_FUNC(self.current_work.value['bits'].bits, self.current_work.value['height']),
+                payee_address=self.current_work.value['payee_address'],
             )
 
         packed_gentx = dash_data.tx_type.pack(gentx)
