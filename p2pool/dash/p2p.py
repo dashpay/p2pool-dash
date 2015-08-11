@@ -76,7 +76,8 @@ class Protocol(p2protocol.Protocol):
             elif inv['type'] == 'block':
                 self.factory.new_block.happened(inv['hash'])
             else:
-                print 'Unneeded inv type', inv
+                if p2pool.DEBUG:
+                    print 'Unneeded inv type', inv
 
     message_getdata = pack.ComposedType([
         ('requests', pack.ListType(pack.ComposedType([
