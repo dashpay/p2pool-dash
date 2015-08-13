@@ -73,6 +73,9 @@ class Protocol(p2protocol.Protocol):
         for inv in invs:
             if inv['type'] == 'tx':
                 self.send_getdata(requests=[inv])
+            elif inv['type'] == 'dstx':
+                inv['type'] ='tx'
+                self.send_getdata(requests=[inv])
             elif inv['type'] == 'block':
                 self.factory.new_block.happened(inv['hash'])
             else:
