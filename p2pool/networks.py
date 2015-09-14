@@ -23,7 +23,7 @@ nets = dict(
         MAX_TARGET=2**256//2**20 - 1,
         PERSIST=True,
         WORKER_PORT=7903,
-        BOOTSTRAP_ADDRS='p2pool.dashninja.pl dash.p2pools.us eu.p2pool.pl dash01.p2poolmining.us p2pool.2sar.ru mining.asia'.split(' '),
+        BOOTSTRAP_ADDRS='dash.p2pools.us eu.p2pool.pl dash01.p2poolmining.us p2pool.2sar.ru mining.asia'.split(' '),
         ANNOUNCE_CHANNEL='#p2pool-dash',
         VERSION_CHECK=lambda v: v >= 110217,
     ),
