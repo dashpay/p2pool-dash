@@ -40,9 +40,7 @@ class P2PNode(p2p.Node):
             
             self.node.tracker.add(share)
         
-        new_known_txs = dict(self.node.known_txs_var.value)
-        new_known_txs.update(all_new_txs)
-        self.node.known_txs_var.set(new_known_txs)
+        self.node.known_txs_var.add(all_new_txs)
         
         if new_count:
             self.node.set_best_share()
@@ -221,7 +219,7 @@ class Node(object):
         
         # BEST SHARE
         
-        self.known_txs_var = variable.Variable({}) # hash -> tx
+        self.known_txs_var = variable.VariableDict({}) # hash -> tx
         self.mining_txs_var = variable.Variable({}) # hash -> tx
         self.get_height_rel_highest = yield height_tracker.get_height_rel_highest_func(self.dashd, self.factory, lambda: self.dashd_work.value['previous_block'], self.net)
         
@@ -236,18 +234,18 @@ class Node(object):
         @self.dashd_work.changed.run_and_watch
         def _(_=None):
             new_mining_txs = {}
-            new_known_txs = dict(self.known_txs_var.value)
+            added_known_txs = {}
             for tx_hash, tx in zip(self.dashd_work.value['transaction_hashes'], self.dashd_work.value['transactions']):
                 new_mining_txs[tx_hash] = tx
-                new_known_txs[tx_hash] = tx
+                added_known_txs[tx_hash] = tx
             self.mining_txs_var.set(new_mining_txs)
-            self.known_txs_var.set(new_known_txs)
+            self.known_txs_var.add(added_known_txs)
         # add p2p transactions from dashd to known_txs
         @self.factory.new_tx.watch
         def _(tx):
-            new_known_txs = dict(self.known_txs_var.value)
-            new_known_txs[dash_data.hash256(dash_data.tx_type.pack(tx))] = tx
-            self.known_txs_var.set(new_known_txs)
+            self.known_txs_var.add({
+                dash_data.hash256(dash_data.tx_type.pack(tx)): tx,
+            })
         # forward transactions seen to dashd
         @self.known_txs_var.transitioned.watch
         @defer.inlineCallbacks
