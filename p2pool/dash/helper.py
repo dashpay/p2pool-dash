@@ -19,7 +19,7 @@ def check(dashd, net):
 
 @deferral.retry('Error getting work from dashd:', 3)
 @defer.inlineCallbacks
-def getwork(dashd, net, use_getblocktemplate=False):
+def getwork(dashd, net, use_getblocktemplate=True):
     def go():
         if use_getblocktemplate:
             return dashd.rpc_getblocktemplate(dict(mode='template'))
@@ -38,8 +38,10 @@ def getwork(dashd, net, use_getblocktemplate=False):
         except jsonrpc.Error_for_code(-32601): # Method not found
             print >>sys.stderr, 'Error: dash version too old! Upgrade to v0.11.2.17 or newer!'
             raise deferral.RetrySilentlyException()
-    packed_transactions = [(x['data'] if isinstance(x, dict) else x).decode('hex') for x in work['transactions']]
-    packed_votes = [(x['data'] if isinstance(x, dict) else x).decode('hex') for x in work['votes']]
+    if work['transactions']:
+        packed_transactions = [(x['data'] if isinstance(x, dict) else x).decode('hex') for x in work['transactions']]
+    else:
+        packed_transactions = [ ]
     if 'height' not in work:
         work['height'] = (yield dashd.rpc_getblock(work['previousblockhash']))['height'] + 1
     elif p2pool.DEBUG:
@@ -58,7 +60,7 @@ def getwork(dashd, net, use_getblocktemplate=False):
         last_update=time.time(),
         use_getblocktemplate=use_getblocktemplate,
         latency=end - start,
-        votes=map(dash_data.vote_type.unpack, packed_votes),
+        votes=None,
         payee=dash_data.address_to_pubkey_hash(work['payee'], net.PARENT) if (work['payee'] != '') else None,
         payee_address=work['payee'].strip() if (work['payee'] != '') else None,
         masternode_payments=work['masternode_payments'],
