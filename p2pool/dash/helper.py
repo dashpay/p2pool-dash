@@ -64,7 +64,7 @@ def getwork(dashd, net, use_getblocktemplate=True):
         payee=dash_data.address_to_pubkey_hash(work['payee'], net.PARENT) if (work['payee'] != '') else None,
         payee_address=work['payee'].strip() if (work['payee'] != '') else None,
         masternode_payments=work['masternode_payments'],
-        payee_amount=work['payee_amount'] if (work['payee_amount'] != '') else work['coinbasevalue'] / 5,
+        payee_amount=work['payee_amount'] if (work['payee_amount'] != '') else work['coinbasevalue'] / 2,
     ))
 
 @deferral.retry('Error submitting primary block: (will retry)', 10, 10)
