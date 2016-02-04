@@ -17,7 +17,6 @@ nets = dict(
             'dashaddress' in (yield dashd.rpc_help()) and
             not (yield dashd.rpc_getinfo())['testnet']
         )),
-        SUBSIDY_FUNC=lambda nBits, height: __import__('dash_subsidy').GetBlockBaseValue(nBits, height),
         BLOCKHASH_FUNC=lambda data: pack.IntType(256).unpack(__import__('x11_hash').getPoWHash(data)),
         POW_FUNC=lambda data: pack.IntType(256).unpack(__import__('x11_hash').getPoWHash(data)),
         BLOCK_PERIOD=150, # s
@@ -39,7 +38,6 @@ nets = dict(
             'dashaddress' in (yield dashd.rpc_help()) and
             (yield dashd.rpc_getinfo())['testnet']
         )),
-        SUBSIDY_FUNC=lambda nBits, height: __import__('dash_subsidy').GetBlockBaseValue_testnet(nBits, height),
         BLOCKHASH_FUNC=lambda data: pack.IntType(256).unpack(__import__('x11_hash').getPoWHash(data)),
         POW_FUNC=lambda data: pack.IntType(256).unpack(__import__('x11_hash').getPoWHash(data)),
         BLOCK_PERIOD=150, # s
