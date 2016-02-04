@@ -39,7 +39,7 @@ def retry(message='Error:', delay=3, max_retries=None, traceback=True):
             for i in itertools.count():
                 try:
                     result = yield func(*args, **kwargs)
-                except Exception, e:
+                except Exception as e:
                     if i == max_retries:
                         raise
                     if not isinstance(e, RetrySilentlyException):

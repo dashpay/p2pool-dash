@@ -655,7 +655,7 @@ def run():
     if args.address is not None and args.address != 'dynamic':
         try:
             args.pubkey_hash = dash_data.address_to_pubkey_hash(args.address, net.PARENT)
-        except Exception, e:
+        except Exception as e:
             parser.error('error parsing address: ' + repr(e))
     else:
         args.pubkey_hash = None
