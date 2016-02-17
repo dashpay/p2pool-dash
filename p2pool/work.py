@@ -163,7 +163,7 @@ class WorkerBridge(worker_interface.WorkerBridge):
         self.pubkeys.popleft()
         self.pubkeys.addkey(new_pubkey)
         print " Updated payout pool:"
-        for i in range(len(self.pubkeys.keys)):
+        for i in xrange(len(self.pubkeys.keys)):
             print '    ...payout %d: %s(%f)' % (i, dash_data.pubkey_hash_to_address(self.pubkeys.keys[i], self.net),self.pubkeys.keyweights[i],)
         self.pubkeys.updatestamp(c)
         print " Next address rotation in : %fs" % (time.time()-c+self.args.timeaddresses)

@@ -146,7 +146,7 @@ class anyType:
 
     def _setAttrs(self, attrs):
         if type(attrs) in (ListType, TupleType):
-            for i in range(0, len(attrs), 2):
+            for i in xrange(0, len(attrs), 2):
                 self._setAttr(attrs[i], attrs[i + 1])
 
             return
@@ -339,7 +339,7 @@ class durationType(anyType):
 
             f = -1
 
-            for i in range(len(data)):
+            for i in xrange(len(data)):
                 if data[i] == None:
                     data[i] = 0
                     continue
@@ -363,7 +363,7 @@ class durationType(anyType):
 
             d = -1
 
-            for i in range(f, len(data)):
+            for i in xrange(f, len(data)):
                 if data[i]:
                     if d != -1:
                         raise Exception, \
@@ -406,7 +406,7 @@ class durationType(anyType):
 
             t = 0
 
-            for i in range(self.__firstnonzero, len(d)):
+            for i in xrange(self.__firstnonzero, len(d)):
                 if d[i]:
                     if i > 2 and not t:
                         s += 'T'
@@ -495,7 +495,7 @@ class recurringInstantType(anyType):
 
                 f = len(data)
 
-                for i in range(f):
+                for i in xrange(f):
                     if data[i] == None:
                         if f < i:
                             raise Exception, \
@@ -529,7 +529,7 @@ class recurringInstantType(anyType):
                 else:
                     e[0] = "%04d" % e[0]
 
-            for i in range(1, len(e)):
+            for i in xrange(1, len(e)):
                 if e[i] == None or (i < 3 and e[i] == 0):
                     e[i] = '-'
                 else:
@@ -1391,7 +1391,7 @@ class arrayType(UserList.UserList, compoundType):
             self._poss = [0] * len(self._dims)      # This will end up
                                                     # reversed too
 
-            for i in range(len(self._dims)):
+            for i in xrange(len(self._dims)):
                 if self._dims[i] < 0 or \
                     self._dims[i] == 0 and len(self._dims) > 1:
                     raise TypeError, "invalid Array dimensions"
@@ -1407,10 +1407,10 @@ class arrayType(UserList.UserList, compoundType):
 
             a = [None] * self._dims[0]
 
-            for i in range(1, len(self._dims)):
+            for i in xrange(1, len(self._dims)):
                 b = []
 
-                for j in range(self._dims[i]):
+                for j in xrange(self._dims[i]):
                     b.append(copy.deepcopy(a))
 
                 a = b
@@ -1433,7 +1433,7 @@ class arrayType(UserList.UserList, compoundType):
             retval = {}
             def fun(x): retval[str(x).encode(encoding)] = self.data[x]
             
-            map( fun, range(len(self.data)) )
+            map( fun, xrange(len(self.data)) )
             return retval
  
     def __getitem__(self, item):
@@ -1478,7 +1478,7 @@ class arrayType(UserList.UserList, compoundType):
 
                         curpos = [0] * len(self._dims)
 
-                        for i in range(len(self._dims)):
+                        for i in xrange(len(self._dims)):
                             curpos[i] = pos % self._dims[i]
                             pos = int(pos / self._dims[i])
 
@@ -1490,7 +1490,7 @@ class arrayType(UserList.UserList, compoundType):
                     elif len(pos) != len(self._dims):
                         raise Exception
                     else:
-                        for i in range(len(self._dims)):
+                        for i in xrange(len(self._dims)):
                             if pos[i] >= self._dims[i]:
                                 raise Exception
 
@@ -1512,7 +1512,7 @@ class arrayType(UserList.UserList, compoundType):
 
         a = self.data
 
-        for i in range(len(self._dims) - 1, 0, -1):
+        for i in xrange(len(self._dims) - 1, 0, -1):
             a = a[curpos[i]]
 
         if curpos[0] >= len(a):
@@ -1523,7 +1523,7 @@ class arrayType(UserList.UserList, compoundType):
         if pos == None:
             self._poss[0] += 1
 
-            for i in range(len(self._dims) - 1):
+            for i in xrange(len(self._dims) - 1):
                 if self._poss[i] < self._dims[i]:
                     break
 
@@ -1538,7 +1538,7 @@ class arrayType(UserList.UserList, compoundType):
     def _placeItem(self, name, value, pos, subpos, attrs = None):
         curpos = [0] * len(self._dims)
 
-        for i in range(len(self._dims)):
+        for i in xrange(len(self._dims)):
             if self._dims[i] == 0:
                 curpos[0] = pos
                 break
@@ -1554,7 +1554,7 @@ class arrayType(UserList.UserList, compoundType):
 
         a = self.data
 
-        for i in range(len(self._dims) - 1, 0, -1):
+        for i in xrange(len(self._dims) - 1, 0, -1):
             a = a[curpos[i]]
 
         if curpos[0] >= len(a):
@@ -1678,7 +1678,7 @@ def simplify(object, level=0):
             raise se
     elif isinstance( object, arrayType ):
         data = object._aslist()
-        for k in range(len(data)):
+        for k in xrange(len(data)):
             data[k] = simplify(data[k], level=level+1)
         return data
     elif isinstance( object, compoundType ) or isinstance(object, structType):
@@ -1693,7 +1693,7 @@ def simplify(object, level=0):
                 object[k] = simplify(object[k])
         return object
     elif type(object)==list:
-        for k in range(len(object)):
+        for k in xrange(len(object)):
             object[k] = simplify(object[k])
         return object
     else:
@@ -1722,7 +1722,7 @@ def simplify_contents(object, level=0):
         raise object
     elif isinstance( object, arrayType ): 
         data = object._aslist()
-        for k in range(len(data)):
+        for k in xrange(len(data)):
             object[k] = simplify(data[k], level=level+1)
     elif isinstance(object, structType):
         data = object._asdict()
@@ -1739,7 +1739,7 @@ def simplify_contents(object, level=0):
             if isPublic(k):
                 object[k] = simplify(object[k])
     elif type(object)==list:
-        for k in range(len(object)):
+        for k in xrange(len(object)):
             object[k] = simplify(object[k])
     
     return object

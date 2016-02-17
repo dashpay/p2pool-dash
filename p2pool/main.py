@@ -64,7 +64,7 @@ class keypool():
 
     def paytotal(self):
         self.payouttotal = 0.0
-        for i in range(len(pubkeys.keys)):
+        for i in xrange(len(pubkeys.keys)):
             self.payouttotal += node.get_current_txouts().get(dash_data.pubkey_hash_to_script2(pubkeys.keys[i]), 0)*1e-8
         return self.payouttotal
 
@@ -196,7 +196,7 @@ def main(args, net, datadir_path, merged_urls, worker_endpoint):
 
                 def paytotal(self):
                     self.payouttotal = 0.0
-                    for i in range(len(pubkeys.keys)):
+                    for i in xrange(len(pubkeys.keys)):
                         self.payouttotal += node.get_current_txouts().get(dash_data.pubkey_hash_to_script2(pubkeys.keys[i]), 0)*1e-8
                     return self.payouttotal
 
@@ -204,7 +204,7 @@ def main(args, net, datadir_path, merged_urls, worker_endpoint):
                     return self.payouttotal
 
             pubkeys = keypool()
-            for i in range(args.numaddresses):
+            for i in xrange(args.numaddresses):
                 address = yield deferral.retry('Error getting a dynamic address from dashd:', 5)(lambda: dashd.rpc_getnewaddress('p2pool'))()
                 new_pubkey = dash_data.address_to_pubkey_hash(address, net.PARENT)
                 pubkeys.addkey(new_pubkey)
@@ -213,7 +213,7 @@ def main(args, net, datadir_path, merged_urls, worker_endpoint):
 
             my_pubkey_hash = pubkeys.keys[0]
 
-            for i in range(len(pubkeys.keys)):
+            for i in xrange(len(pubkeys.keys)):
                 print '    ...payout %d: %s' % (i, dash_data.pubkey_hash_to_address(pubkeys.keys[i], net.PARENT),)
         
         print "Loading shares..."
@@ -440,7 +440,7 @@ def main(args, net, datadir_path, merged_urls, worker_endpoint):
                         
                         paystr = ''
                         paytot = 0.0
-                        for i in range(len(pubkeys.keys)):
+                        for i in xrange(len(pubkeys.keys)):
                             curtot = node.get_current_txouts().get(dash_data.pubkey_hash_to_script2(pubkeys.keys[i]), 0)
                             paytot += curtot*1e-8
                             paystr += "(%.4f)" % (curtot*1e-8,)

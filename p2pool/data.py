@@ -276,7 +276,7 @@ class Share(object):
             assert share_count < 110
             if share_count == 0:
                 n.add(tx_count)
-        assert n == set(range(len(self.share_info['new_transaction_hashes'])))
+        assert n == set(xrange(len(self.share_info['new_transaction_hashes'])))
         
         self.gentx_hash = check_hash_link(
             self.hash_link,
