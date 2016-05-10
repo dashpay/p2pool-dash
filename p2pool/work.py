@@ -397,10 +397,7 @@ class WorkerBridge(worker_interface.WorkerBridge):
             pow_hash = self.node.net.PARENT.POW_FUNC(dash_data.block_header_type.pack(header))
             try:
                 if pow_hash <= header['bits'].target or p2pool.DEBUG:
-                    if self.node.dashd_work.value['masternode_payments']:
-                        helper.submit_block(dict(header=header, txs=[new_gentx] + other_transactions, votes=self.node.dashd_work.value['votes']), False, self.node.factory, self.node.dashd, self.node.dashd_work, self.node.net)
-                    else:
-                        helper.submit_block(dict(header=header, txs=[new_gentx] + other_transactions), False, self.node.factory, self.node.dashd, self.node.dashd_work, self.node.net)
+                    helper.submit_block(dict(header=header, txs=[new_gentx] + other_transactions), False, self.node.factory, self.node.dashd, self.node.dashd_work, self.node.net)
                     if pow_hash <= header['bits'].target:
                         print
                         print 'GOT BLOCK FROM MINER! Passing to dashd! %s%064x' % (self.node.net.PARENT.BLOCK_EXPLORER_URL_PREFIX, header_hash)
