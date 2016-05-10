@@ -64,7 +64,7 @@ def getwork(dashd, net, use_getblocktemplate=True):
         payee=dash_data.address_to_pubkey_hash(work['payee'], net.PARENT) if (work['payee'] != '') else None,
         payee_address=work['payee'].strip() if (work['payee'] != '') else None,
         masternode_payments=work['masternode_payments'],
-        payee_amount=work['payee_amount'] if (work['payee_amount'] != '') else work['coinbasevalue'] / 2,
+        payee_amount=work['payee_amount'] if (work['payee_amount'] != '') else 0,
     ))
 
 @deferral.retry('Error submitting primary block: (will retry)', 10, 10)
@@ -91,5 +91,5 @@ def submit_block_rpc(block, ignore_failure, dashd, dashd_work, net):
         print >>sys.stderr, 'Block submittal result: %s (%r) Expected: %s' % (success, result, success_expected)
 
 def submit_block(block, ignore_failure, factory, dashd, dashd_work, net):
-    submit_block_p2p(block, factory, net)
     submit_block_rpc(block, ignore_failure, dashd, dashd_work, net)
+    submit_block_p2p(block, factory, net)
