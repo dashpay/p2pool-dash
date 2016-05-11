@@ -315,7 +315,7 @@ class Node(object):
 		#real_subsidy = real_subsidy*92.9/100
 		#i = i + 210240
         # Use value from getblocktemplate's result.
-        if self.dashd_work.value['payee_amount'] > 0:
+        if self.dashd_work.value['payee_amount'] >= 0 :
             real_pay = real_subsidy - self.dashd_work.value['payee_amount']
             return p2pool_data.get_expected_payouts(self.tracker, self.best_share_var.value, self.dashd_work.value['bits'].target, real_pay, self.net)
             
