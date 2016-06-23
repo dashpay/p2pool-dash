@@ -382,13 +382,7 @@ class Share(object):
         
         return False, None
     
-    def as_block(self, tracker, known_txs, votes):
-        other_txs = self._get_other_txs(tracker, known_txs)
-        if other_txs is None:
-            return None # not all txs present
-        return dict(header=self.header, txs=[self.check(tracker)] + other_txs, votes=votes)
-
-    def as_block_old(self, tracker, known_txs):
+    def as_block(self, tracker, known_txs):
         other_txs = self._get_other_txs(tracker, known_txs)
         if other_txs is None:
             return None # not all txs present

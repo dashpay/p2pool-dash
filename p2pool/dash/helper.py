@@ -60,7 +60,6 @@ def getwork(dashd, net, use_getblocktemplate=True):
         last_update=time.time(),
         use_getblocktemplate=use_getblocktemplate,
         latency=end - start,
-        votes=None,
         payee=dash_data.address_to_pubkey_hash(work['payee'], net.PARENT) if (work['payee'] != '') else None,
         payee_address=work['payee'].strip() if (work['payee'] != '') else None,
         masternode_payments=work['masternode_payments'],
