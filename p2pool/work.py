@@ -100,8 +100,8 @@ class WorkerBridge(worker_interface.WorkerBridge):
             t = self.node.dashd_work.value
             bb = self.node.best_block_header.value
             if bb is not None and bb['previous_block'] == t['previous_block'] and self.node.net.PARENT.POW_FUNC(dash_data.block_header_type.pack(bb)) <= t['bits'].target:
-                print 'Skipping from block %x to block %x!' % (bb['previous_block'],
-                    self.node.net.PARENT.BLOCKHASH_FUNC(dash_data.block_header_type.pack(bb)))
+                print 'Skipping from block %x to block %x! NewHeight=%s' % (bb['previous_block'],
+                    self.node.net.PARENT.BLOCKHASH_FUNC(dash_data.block_header_type.pack(bb)),t['height']+1,)
                 t = dict(
                     version=bb['version'],
                     previous_block=self.node.net.PARENT.BLOCKHASH_FUNC(dash_data.block_header_type.pack(bb)),
@@ -364,9 +364,11 @@ class WorkerBridge(worker_interface.WorkerBridge):
         else:
             current_time = time.time()
             if (current_time - print_throttle) > 5.0:
-                print 'New work for worker! Difficulty: %.06f Share difficulty: %.06f Total block value: %.6f %s including %i transactions' % (
+                print 'New work for worker %s! Difficulty: %.06f Share difficulty: %.06f Block %s Total value: %.6f %s including %i transactions' % (
+                    dash_data.pubkey_hash_to_address(pubkey_hash, self.node.net.PARENT),
                     dash_data.target_to_difficulty(target),
                     dash_data.target_to_difficulty(share_info['bits'].target),
+                    self.current_work.value['height'],
                     self.current_work.value['subsidy']*1e-8, self.node.net.PARENT.SYMBOL,
                     len(self.current_work.value['transactions']),
                 )
