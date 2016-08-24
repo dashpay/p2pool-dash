@@ -14,7 +14,7 @@ def check(dashd, net):
         print >>sys.stderr, "    Check failed! Make sure that you're connected to the right dashd with --dashd-rpc-port!"
         raise deferral.RetrySilentlyException()
     if not net.VERSION_CHECK((yield dashd.rpc_getinfo())['version']):
-        print >>sys.stderr, '    dash version too old! Upgrade to 0.11.2.17 or newer!'
+        print >>sys.stderr, '    dash version too old! Upgrade to 0.12.0.58 or newer!'
         raise deferral.RetrySilentlyException()
 
 @deferral.retry('Error getting work from dashd:', 3)
