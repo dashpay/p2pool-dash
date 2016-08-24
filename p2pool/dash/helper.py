@@ -46,6 +46,17 @@ def getwork(dashd, net, use_getblocktemplate=True):
         work['height'] = (yield dashd.rpc_getblock(work['previousblockhash']))['height'] + 1
     elif p2pool.DEBUG:
         assert work['height'] == (yield dashd.rpc_getblock(work['previousblockhash']))['height'] + 1
+    # Masternode payment
+    if 'masternode' in work: # v0.12.1.x
+        masternode_payments=work['masternode_payments_started']
+        payee_address=work['masternode']['payee'] if (work['masternode']['payee'] != '') else None
+        payee_pubkeyhash=dash_data.address_to_pubkey_hash(work['masternode']['payee'], net.PARENT) if (work['masternode']['payee'] != '') else None
+        payee_amount=work['masternode']['amount'] if (work['masternode']['amount'] != '') else None
+    else: # v0.12.0.x
+        masternode_payments=work['masternode_payments']
+        payee_address=work['payee'].strip() if (work['payee'] != '') else None
+        payee_pubkeyhash=dash_data.address_to_pubkey_hash(work['payee'], net.PARENT) if (work['payee'] != '') else None
+        payee_amount=work['payee_amount'] if (work['payee_amount'] != '') else 0
     defer.returnValue(dict(
         version=work['version'],
         previous_block=int(work['previousblockhash'], 16),
@@ -60,10 +71,10 @@ def getwork(dashd, net, use_getblocktemplate=True):
         last_update=time.time(),
         use_getblocktemplate=use_getblocktemplate,
         latency=end - start,
-        payee=dash_data.address_to_pubkey_hash(work['payee'], net.PARENT) if (work['payee'] != '') else None,
-        payee_address=work['payee'].strip() if (work['payee'] != '') else None,
-        masternode_payments=work['masternode_payments'],
-        payee_amount=work['payee_amount'] if (work['payee_amount'] != '') else 0,
+        masternode_payments=masternode_payments,
+        payee_address=payee_address,
+        payee=payee_pubkeyhash,
+        payee_amount=payee_amount,
     ))
 
 @deferral.retry('Error submitting primary block: (will retry)', 10, 10)
