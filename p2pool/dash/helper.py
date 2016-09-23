@@ -47,12 +47,12 @@ def getwork(dashd, net, use_getblocktemplate=True):
     elif p2pool.DEBUG:
         assert work['height'] == (yield dashd.rpc_getblock(work['previousblockhash']))['height'] + 1
     # Masternode payment
-    if 'masternode' in work: # v0.12.1.x
+    if 'masternode_payments_started' in work: # v0.12.1.x
         masternode_payments=work['masternode_payments_started']
         payee_address=work['masternode']['payee'] if (work['masternode']['payee'] != '') else None
         payee_pubkeyhash=dash_data.address_to_pubkey_hash(work['masternode']['payee'], net.PARENT) if (work['masternode']['payee'] != '') else None
         payee_amount=work['masternode']['amount'] if (work['masternode']['amount'] != '') else None
-    else: # v0.12.0.x
+    elif 'masternode_payments' in work: # v0.12.0.x
         masternode_payments=work['masternode_payments']
         payee_address=work['payee'].strip() if (work['payee'] != '') else None
         payee_pubkeyhash=dash_data.address_to_pubkey_hash(work['payee'], net.PARENT) if (work['payee'] != '') else None
