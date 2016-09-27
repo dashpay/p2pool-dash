@@ -19,9 +19,9 @@ Download the required submodules:
     git submodule init
     git submodule update
 
-x11_hash:
+dash_hash:
 
-    cd x11-hash
+    cd dash-hash
     python setup.py install
 
 Running P2Pool:

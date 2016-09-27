@@ -4,7 +4,7 @@ python:
 sudo: required
 install:
   - git submodule update
-  - cd x11-hash && python setup.py install && cd ..
+  - cd dash_hash && python setup.py install && cd ..
   - pip install -I coverage twisted service_identity
 script:
   - python run_p2pool.py --help
