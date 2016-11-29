@@ -335,6 +335,7 @@ class WorkerBridge(worker_interface.WorkerBridge):
                 known_txs=tx_map,
                 base_subsidy=self.current_work.value['subsidy'],
                 payee_address=self.current_work.value['payee_address'],
+                superblocks=self.current_work.value['packed_superblocks']
             )
 
         packed_gentx = dash_data.tx_type.pack(gentx)

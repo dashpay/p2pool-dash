@@ -49,14 +49,29 @@ def getwork(dashd, net, use_getblocktemplate=True):
     # Masternode payment
     if 'masternode_payments_started' in work: # v0.12.1.x
         masternode_payments=work['masternode_payments_started']
-        payee_address=work['masternode']['payee'] if (work['masternode']['payee'] != '') else None
-        payee_pubkeyhash=dash_data.address_to_pubkey_hash(work['masternode']['payee'], net.PARENT) if (work['masternode']['payee'] != '') else None
-        payee_amount=work['masternode']['amount'] if (work['masternode']['amount'] != '') else None
+        if 'payee' in work['masternode']: 
+            payee_address=work['masternode']['payee'] if (work['masternode']['payee'] != '') else None
+            payee_pubkeyhash=dash_data.address_to_pubkey_hash(work['masternode']['payee'], net.PARENT) if (work['masternode']['payee'] != '') else None
+            payee_amount=work['masternode']['amount'] if (work['masternode']['amount'] != '') else None
+        else:
+            payee_address=None
+            payee_pubkeyhash=None
+            payee_amount=0
     elif 'masternode_payments' in work: # v0.12.0.x
         masternode_payments=work['masternode_payments']
         payee_address=work['payee'].strip() if (work['payee'] != '') else None
         payee_pubkeyhash=dash_data.address_to_pubkey_hash(work['payee'], net.PARENT) if (work['payee'] != '') else None
         payee_amount=work['payee_amount'] if (work['payee_amount'] != '') else 0
+    # Superblock payment
+    if 'superblocks_started' in work: # v0.12.1.x
+        superblock_payments=work['superblocks_started']
+        if work['superblock']:
+            packed_superblocks = work['superblock']
+        else:
+            packed_superblocks = [ ]
+    else:
+        superblock_payments='false'
+        packed_superblocks = [ ]
     defer.returnValue(dict(
         version=work['version'],
         previous_block=int(work['previousblockhash'], 16),
@@ -75,6 +90,8 @@ def getwork(dashd, net, use_getblocktemplate=True):
         payee_address=payee_address,
         payee=payee_pubkeyhash,
         payee_amount=payee_amount,
+        superblock_payments=superblock_payments,
+        packed_superblocks = packed_superblocks,
     ))
 
 @deferral.retry('Error submitting primary block: (will retry)', 10, 10)

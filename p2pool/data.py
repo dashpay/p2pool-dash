@@ -110,7 +110,7 @@ class Share(object):
     gentx_before_refhash = pack.VarStrType().pack(DONATION_SCRIPT) + pack.IntType(64).pack(0) + pack.VarStrType().pack('\x6a\x28' + pack.IntType(256).pack(0) + pack.IntType(64).pack(0))[:3]
     
     @classmethod
-    def generate_transaction(cls, tracker, share_data, block_target, desired_timestamp, desired_target, ref_merkle_link, desired_other_transaction_hashes_and_fees, net, known_txs=None, last_txout_nonce=0, base_subsidy=None, payee_address=None):
+    def generate_transaction(cls, tracker, share_data, block_target, desired_timestamp, desired_target, ref_merkle_link, desired_other_transaction_hashes_and_fees, net, known_txs=None, last_txout_nonce=0, base_subsidy=None, payee_address=None, superblocks=None):
         previous_share = tracker.items[share_data['previous_share_hash']] if share_data['previous_share_hash'] is not None else None
         
         height, last = tracker.get_height_and_last(share_data['previous_share_hash'])
@@ -167,6 +167,12 @@ class Share(object):
         
         worker_payout = share_data['subsidy']
         
+        superblock_tx = []
+        if superblocks is not None:
+            superblock_tx = [dict(value=amounts[obj], script=script[obj]) for obj in superblocks if amounts[obj]]
+            for obj in superblocks:
+                worker_payout -= amounts[obj]
+
         masternode_tx = []
         if share_data['payee'] is not None:
             masternode_payout = share_data['payee_amount']
@@ -212,7 +218,7 @@ class Share(object):
                 sequence=None,
                 script=share_data['coinbase'],
             )],
-            tx_outs=worker_tx + masternode_tx + donation_tx + [dict(
+            tx_outs=worker_tx + masternode_tx + superblock_tx + donation_tx + [dict(
                 value=0,
                 script='\x6a\x28' + cls.get_ref_hash(net, share_info, ref_merkle_link) + pack.IntType(64).pack(last_txout_nonce),
             )],
