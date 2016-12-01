@@ -76,6 +76,10 @@ class Share(object):
             ('desired_version', pack.VarIntType()),
             ('payee', pack.PossiblyNoneType(0, pack.IntType(160))),
             ('payee_amount', pack.IntType(64)),
+            ('packed_superblocks', pack.ListType(pack.ComposedType([
+                ('payee', pack.VarStrType()),
+                ('amount', pack.IntType(64)),
+                ]))),
         ])),
         ('new_transaction_hashes', pack.ListType(pack.IntType(256))),
         ('transaction_hash_refs', pack.ListType(pack.VarIntType(), 2)), # pairs of share_count, tx_count
@@ -110,7 +114,7 @@ class Share(object):
     gentx_before_refhash = pack.VarStrType().pack(DONATION_SCRIPT) + pack.IntType(64).pack(0) + pack.VarStrType().pack('\x6a\x28' + pack.IntType(256).pack(0) + pack.IntType(64).pack(0))[:3]
     
     @classmethod
-    def generate_transaction(cls, tracker, share_data, block_target, desired_timestamp, desired_target, ref_merkle_link, desired_other_transaction_hashes_and_fees, net, known_txs=None, last_txout_nonce=0, base_subsidy=None, payee_address=None, superblocks=None):
+    def generate_transaction(cls, tracker, share_data, block_target, desired_timestamp, desired_target, ref_merkle_link, desired_other_transaction_hashes_and_fees, net, known_txs=None, last_txout_nonce=0, base_subsidy=None):
         previous_share = tracker.items[share_data['previous_share_hash']] if share_data['previous_share_hash'] is not None else None
         
         height, last = tracker.get_height_and_last(share_data['previous_share_hash'])
@@ -167,20 +171,20 @@ class Share(object):
         
         worker_payout = share_data['subsidy']
         
+        superblocks = share_data['packed_superblocks']
         superblock_tx = []
         if superblocks is not None:
-            superblock_tx = [dict(value=amounts[obj], script=script[obj]) for obj in superblocks if amounts[obj]]
             for obj in superblocks:
-                worker_payout -= amounts[obj]
+                sb_script = dash_data.address_to_script2(obj['payee'],net.PARENT)
+                sb_payout = obj['amount']
+                superblock_tx += [dict(value=sb_payout, script=sb_script)]
+                worker_payout -= sb_payout
 
         masternode_tx = []
         if share_data['payee'] is not None:
             masternode_payout = share_data['payee_amount']
             worker_payout -= masternode_payout
-            if payee_address is not None:
-                payee_script = dash_data.address_to_script2(payee_address,net.PARENT)
-            else:
-                payee_script = dash_data.pubkey_hash_to_script2(share_data['payee'])
+            payee_script = dash_data.pubkey_hash_to_script2(share_data['payee'])
             masternode_tx = [dict(value=masternode_payout, script=payee_script)]
 
         amounts = dict((script, worker_payout*(49*weight)//(50*total_weight)) for script, weight in weights.iteritems()) # 98% goes according to weights prior to this share

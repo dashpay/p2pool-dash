@@ -38,6 +38,7 @@ def getwork(dashd, net, use_getblocktemplate=True):
         except jsonrpc.Error_for_code(-32601): # Method not found
             print >>sys.stderr, 'Error: dash version too old! Upgrade to v0.11.2.17 or newer!'
             raise deferral.RetrySilentlyException()
+
     if work['transactions']:
         packed_transactions = [(x['data'] if isinstance(x, dict) else x).decode('hex') for x in work['transactions']]
     else:
@@ -46,6 +47,7 @@ def getwork(dashd, net, use_getblocktemplate=True):
         work['height'] = (yield dashd.rpc_getblock(work['previousblockhash']))['height'] + 1
     elif p2pool.DEBUG:
         assert work['height'] == (yield dashd.rpc_getblock(work['previousblockhash']))['height'] + 1
+
     # Masternode payment
     if 'masternode_payments_started' in work: # v0.12.1.x
         masternode_payments=work['masternode_payments_started']
@@ -62,16 +64,22 @@ def getwork(dashd, net, use_getblocktemplate=True):
         payee_address=work['payee'].strip() if (work['payee'] != '') else None
         payee_pubkeyhash=dash_data.address_to_pubkey_hash(work['payee'], net.PARENT) if (work['payee'] != '') else None
         payee_amount=work['payee_amount'] if (work['payee_amount'] != '') else 0
+
     # Superblock payment
     if 'superblocks_started' in work: # v0.12.1.x
         superblock_payments=work['superblocks_started']
+        packed_superblocks = []
         if work['superblock']:
-            packed_superblocks = work['superblock']
-        else:
-            packed_superblocks = [ ]
+            superblocks = work['superblock']
+            for obj in superblocks:
+                g={}
+                g['payee']=str(obj['payee'])
+                g['amount']=obj['amount']
+                packed_superblocks.append(g)
     else:
         superblock_payments='false'
         packed_superblocks = [ ]
+
     defer.returnValue(dict(
         version=work['version'],
         previous_block=int(work['previousblockhash'], 16),

@@ -115,8 +115,8 @@ class WorkerBridge(worker_interface.WorkerBridge):
                     subsidy=self.node.dashd_work.value['subsidy'],
                     last_update=self.node.dashd_work.value['last_update'],
                     payee=self.node.dashd_work.value['payee'],
-                    payee_address=self.node.dashd_work.value['payee_address'],
                     payee_amount=self.node.dashd_work.value['payee_amount'],
+                    packed_superblocks=self.node.dashd_work.value['packed_superblocks'],
                 )
 
             self.current_work.set(t)
@@ -325,6 +325,7 @@ class WorkerBridge(worker_interface.WorkerBridge):
                     desired_version=(share_type.SUCCESSOR if share_type.SUCCESSOR is not None else share_type).VOTING_VERSION,
                     payee=self.current_work.value['payee'],
                     payee_amount=self.current_work.value['payee_amount'],
+                    packed_superblocks=self.current_work.value['packed_superblocks'],
                 ),
                 block_target=self.current_work.value['bits'].target,
                 desired_timestamp=int(time.time() + 0.5),
@@ -334,8 +335,6 @@ class WorkerBridge(worker_interface.WorkerBridge):
                 net=self.node.net,
                 known_txs=tx_map,
                 base_subsidy=self.current_work.value['subsidy'],
-                payee_address=self.current_work.value['payee_address'],
-                superblocks=self.current_work.value['packed_superblocks']
             )
 
         packed_gentx = dash_data.tx_type.pack(gentx)
