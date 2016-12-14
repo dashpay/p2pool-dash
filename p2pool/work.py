@@ -114,9 +114,8 @@ class WorkerBridge(worker_interface.WorkerBridge):
                     merkle_link=dash_data.calculate_merkle_link([None], 0),
                     subsidy=self.node.dashd_work.value['subsidy'],
                     last_update=self.node.dashd_work.value['last_update'],
-                    payee=self.node.dashd_work.value['payee'],
-                    payee_amount=self.node.dashd_work.value['payee_amount'],
-                    packed_superblocks=self.node.dashd_work.value['packed_superblocks'],
+                    payment_amount=self.node.dashd_work.value['payment_amount'],
+                    packed_payments=self.node.dashd_work.value['packed_payments'],
                 )
 
             self.current_work.set(t)
@@ -323,9 +322,8 @@ class WorkerBridge(worker_interface.WorkerBridge):
                         None
                     )(*self.get_stale_counts()),
                     desired_version=(share_type.SUCCESSOR if share_type.SUCCESSOR is not None else share_type).VOTING_VERSION,
-                    payee=self.current_work.value['payee'],
-                    payee_amount=self.current_work.value['payee_amount'],
-                    packed_superblocks=self.current_work.value['packed_superblocks'],
+                    payment_amount=self.current_work.value['payment_amount'],
+                    packed_payments=self.current_work.value['packed_payments'],
                 ),
                 block_target=self.current_work.value['bits'].target,
                 desired_timestamp=int(time.time() + 0.5),

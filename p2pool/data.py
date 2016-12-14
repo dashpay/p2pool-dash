@@ -52,8 +52,8 @@ def load_share(share, net, peer_addr):
 DONATION_SCRIPT = '41047559d13c3f81b1fadbd8dd03e4b5a1c73b05e2b980e00d467aa9440b29c7de23664dde6428d75cafed22ae4f0d302e26c5c5a5dd4d3e1b796d7281bdc9430f35ac'.decode('hex')
 
 class Share(object):
-    VERSION = 14
-    VOTING_VERSION = 14
+    VERSION = 15
+    VOTING_VERSION = 15
     SUCCESSOR = None
     
     small_block_header_type = pack.ComposedType([
@@ -74,11 +74,10 @@ class Share(object):
             ('donation', pack.IntType(16)),
             ('stale_info', pack.EnumType(pack.IntType(8), dict((k, {0: None, 253: 'orphan', 254: 'doa'}.get(k, 'unk%i' % (k,))) for k in xrange(256)))),
             ('desired_version', pack.VarIntType()),
-            ('payee', pack.PossiblyNoneType(0, pack.IntType(160))),
-            ('payee_amount', pack.IntType(64)),
-            ('packed_superblocks', pack.ListType(pack.ComposedType([
-                ('payee', pack.VarStrType()),
-                ('amount', pack.IntType(64)),
+            ('payment_amount', pack.IntType(64)),
+            ('packed_payments', pack.ListType(pack.ComposedType([
+                ('payee', pack.PossiblyNoneType('',pack.VarStrType())),
+                ('amount', pack.PossiblyNoneType(0,pack.IntType(64))),
                 ]))),
         ])),
         ('new_transaction_hashes', pack.ListType(pack.IntType(256))),
@@ -171,21 +170,15 @@ class Share(object):
         
         worker_payout = share_data['subsidy']
         
-        superblocks = share_data['packed_superblocks']
-        superblock_tx = []
-        if superblocks is not None:
-            for obj in superblocks:
-                sb_script = dash_data.address_to_script2(obj['payee'],net.PARENT)
-                sb_payout = obj['amount']
-                superblock_tx += [dict(value=sb_payout, script=sb_script)]
-                worker_payout -= sb_payout
-
-        masternode_tx = []
-        if share_data['payee'] is not None:
-            masternode_payout = share_data['payee_amount']
-            worker_payout -= masternode_payout
-            payee_script = dash_data.pubkey_hash_to_script2(share_data['payee'])
-            masternode_tx = [dict(value=masternode_payout, script=payee_script)]
+        payments = share_data['packed_payments']
+        payments_tx = []
+        if payments is not None:
+            for obj in payments:
+                pm_script = dash_data.address_to_script2(obj['payee'],net.PARENT)
+                pm_payout = obj['amount']
+                if pm_payout > 0:
+                    payments_tx += [dict(value=pm_payout, script=pm_script)]
+                    worker_payout -= pm_payout
 
         amounts = dict((script, worker_payout*(49*weight)//(50*total_weight)) for script, weight in weights.iteritems()) # 98% goes according to weights prior to this share
         this_script = dash_data.pubkey_hash_to_script2(share_data['pubkey_hash'])
@@ -222,7 +215,7 @@ class Share(object):
                 sequence=None,
                 script=share_data['coinbase'],
             )],
-            tx_outs=worker_tx + masternode_tx + superblock_tx + donation_tx + [dict(
+            tx_outs=worker_tx + payments_tx + donation_tx + [dict(
                 value=0,
                 script='\x6a\x28' + cls.get_ref_hash(net, share_info, ref_merkle_link) + pack.IntType(64).pack(last_txout_nonce),
             )],

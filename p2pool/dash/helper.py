@@ -48,37 +48,24 @@ def getwork(dashd, net, use_getblocktemplate=True):
     elif p2pool.DEBUG:
         assert work['height'] == (yield dashd.rpc_getblock(work['previousblockhash']))['height'] + 1
 
-    # Masternode payment
-    if 'masternode_payments_started' in work: # v0.12.1.x
-        masternode_payments=work['masternode_payments_started']
-        if 'payee' in work['masternode']: 
-            payee_address=work['masternode']['payee'] if (work['masternode']['payee'] != '') else None
-            payee_pubkeyhash=dash_data.address_to_pubkey_hash(work['masternode']['payee'], net.PARENT) if (work['masternode']['payee'] != '') else None
-            payee_amount=work['masternode']['amount'] if (work['masternode']['amount'] != '') else None
-        else:
-            payee_address=None
-            payee_pubkeyhash=None
-            payee_amount=0
-    elif 'masternode_payments' in work: # v0.12.0.x
-        masternode_payments=work['masternode_payments']
-        payee_address=work['payee'].strip() if (work['payee'] != '') else None
-        payee_pubkeyhash=dash_data.address_to_pubkey_hash(work['payee'], net.PARENT) if (work['payee'] != '') else None
-        payee_amount=work['payee_amount'] if (work['payee_amount'] != '') else 0
-
-    # Superblock payment
-    if 'superblocks_started' in work: # v0.12.1.x
-        superblock_payments=work['superblocks_started']
-        packed_superblocks = []
-        if work['superblock']:
-            superblocks = work['superblock']
-            for obj in superblocks:
+    # Dash Payments
+    packed_payments = []
+    payment_amount = 0
+    if 'payee' in work['masternode']:
+        g={}
+        g['payee']=str(work['masternode']['payee'])
+        g['amount']=work['masternode']['amount']
+        if g['amount'] > 0:
+            payment_amount += g['amount']
+            packed_payments.append(g)
+    elif work['superblock']:
+        for obj in work['superblock']:
                 g={}
                 g['payee']=str(obj['payee'])
                 g['amount']=obj['amount']
-                packed_superblocks.append(g)
-    else:
-        superblock_payments='false'
-        packed_superblocks = [ ]
+                if g['amount'] > 0:
+                    payment_amount += g['amount']
+                    packed_payments.append(g)
 
     defer.returnValue(dict(
         version=work['version'],
@@ -94,12 +81,8 @@ def getwork(dashd, net, use_getblocktemplate=True):
         last_update=time.time(),
         use_getblocktemplate=use_getblocktemplate,
         latency=end - start,
-        masternode_payments=masternode_payments,
-        payee_address=payee_address,
-        payee=payee_pubkeyhash,
-        payee_amount=payee_amount,
-        superblock_payments=superblock_payments,
-        packed_superblocks = packed_superblocks,
+        payment_amount = payment_amount,
+        packed_payments = packed_payments,
     ))
 
 @deferral.retry('Error submitting primary block: (will retry)', 10, 10)
