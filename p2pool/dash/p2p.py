@@ -65,13 +65,16 @@ class Protocol(p2protocol.Protocol):
 
     message_inv = pack.ComposedType([
         ('invs', pack.ListType(pack.ComposedType([
-            ('type', pack.EnumType(pack.IntType(32), {1: 'tx', 2: 'block', 3: 'filtered_block', 4: 'txlock_request', 5: 'txlock_vote', 6: 'spork', 7: 'masternode_winner', 8: 'masternode_scanning_error', 9: 'budget_vote', 10: 'budget_proposal', 11: 'budget_finalized', 12: 'budget_finalized_vote', 13: 'masternode_quorum', 14: 'masternode_announce', 15: 'masternode_ping'})),
+            ('type', pack.EnumType(pack.IntType(32), {1: 'tx', 2: 'block', 3: 'filtered_block', 4: 'txlock_request', 5: 'txlock_vote', 6: 'spork', 7: 'masternode_winner', 8: 'masternode_scanning_error', 9: 'budget_vote', 10: 'budget_proposal', 11: 'budget_finalized', 12: 'budget_finalized_vote', 13: 'masternode_quorum', 14: 'masternode_announce', 15: 'masternode_ping', 16: 'dstx'})),
             ('hash', pack.IntType(256)),
         ]))),
     ])
     def handle_inv(self, invs):
         for inv in invs:
             if inv['type'] == 'tx':
+                self.send_getdata(requests=[inv])
+            elif inv['type'] == 'dstx':
+                inv['type'] ='tx'
                 self.send_getdata(requests=[inv])
             elif inv['type'] == 'block':
                 self.factory.new_block.happened(inv['hash'])
