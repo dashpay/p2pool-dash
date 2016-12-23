@@ -20,7 +20,7 @@ BLOCKHASH_FUNC = lambda data: pack.IntType(256).unpack(__import__('dash_hash').g
 POW_FUNC = lambda data: pack.IntType(256).unpack(__import__('dash_hash').getPoWHash(data))
 BLOCK_PERIOD = 150 # s
 SYMBOL = 'tDASH'
-CONF_FILE_FUNC = lambda: os.path.join(os.path.join(os.environ['APPDATA'], 'Dash') if platform.system() == 'Windows' else os.path.expanduser('~/Library/Application Support/Dash/') if platform.system() == 'Darwin' else os.path.expanduser('~/.dash'), 'dash.conf')
+CONF_FILE_FUNC = lambda: os.path.join(os.path.join(os.environ['APPDATA'], 'DashCore') if platform.system() == 'Windows' else os.path.expanduser('~/Library/Application Support/DashCore/') if platform.system() == 'Darwin' else os.path.expanduser('~/.dashcore'), 'dash.conf')
 BLOCK_EXPLORER_URL_PREFIX = 'https://test.explorer.dash.org/block/'
 ADDRESS_EXPLORER_URL_PREFIX = 'https://test.explorer.dash.org/address/'
 TX_EXPLORER_URL_PREFIX = 'https://test.explorer.dash.org/tx/'
