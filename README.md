@@ -2,7 +2,7 @@ Requirements:
 -------------------------
 Generic:
 
-* Dashd >=0.12.0.55
+* Dashd >=0.12.1.0
 * Python >=2.7
 * Twisted >=13.0.0
 * Zope.interface >=3.8.0
