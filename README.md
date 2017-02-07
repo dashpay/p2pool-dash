@@ -21,8 +21,8 @@ Download the required submodules:
 
 dash_hash:
 
-    cd dash-hash
-    python setup.py install
+    cd dash_hash
+    python setup.py install --user
 
 Running P2Pool:
 -------------------------
