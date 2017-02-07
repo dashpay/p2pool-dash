@@ -100,8 +100,8 @@ class WorkerBridge(worker_interface.WorkerBridge):
             t = self.node.dashd_work.value
             bb = self.node.best_block_header.value
             if bb is not None and bb['previous_block'] == t['previous_block'] and self.node.net.PARENT.POW_FUNC(dash_data.block_header_type.pack(bb)) <= t['bits'].target:
-                print 'Skipping from block %x to block %x!' % (bb['previous_block'],
-                    self.node.net.PARENT.BLOCKHASH_FUNC(dash_data.block_header_type.pack(bb)))
+                print 'Skipping from block %x to block %x! NewHeight=%s' % (bb['previous_block'],
+                    self.node.net.PARENT.BLOCKHASH_FUNC(dash_data.block_header_type.pack(bb)),t['height']+1,)
                 t = dict(
                     version=bb['version'],
                     previous_block=self.node.net.PARENT.BLOCKHASH_FUNC(dash_data.block_header_type.pack(bb)),
@@ -112,11 +112,10 @@ class WorkerBridge(worker_interface.WorkerBridge):
                     transactions=[],
                     transaction_fees=[],
                     merkle_link=dash_data.calculate_merkle_link([None], 0),
-                    subsidy=self.node.net.PARENT.SUBSIDY_FUNC(self.node.dashd_work.value['bits'].bits, self.node.dashd_work.value['height']),
+                    subsidy=self.node.dashd_work.value['subsidy'],
                     last_update=self.node.dashd_work.value['last_update'],
-                    payee=self.node.dashd_work.value['payee'],
-                    payee_address=self.node.dashd_work.value['payee_address'],
-                    payee_amount=self.node.dashd_work.value['payee_amount'],
+                    payment_amount=self.node.dashd_work.value['payment_amount'],
+                    packed_payments=self.node.dashd_work.value['packed_payments'],
                 )
 
             self.current_work.set(t)
@@ -163,7 +162,7 @@ class WorkerBridge(worker_interface.WorkerBridge):
         self.pubkeys.popleft()
         self.pubkeys.addkey(new_pubkey)
         print " Updated payout pool:"
-        for i in range(len(self.pubkeys.keys)):
+        for i in xrange(len(self.pubkeys.keys)):
             print '    ...payout %d: %s(%f)' % (i, dash_data.pubkey_hash_to_address(self.pubkeys.keys[i], self.net),self.pubkeys.keyweights[i],)
         self.pubkeys.updatestamp(c)
         print " Next address rotation in : %fs" % (time.time()-c+self.args.timeaddresses)
@@ -323,8 +322,8 @@ class WorkerBridge(worker_interface.WorkerBridge):
                         None
                     )(*self.get_stale_counts()),
                     desired_version=(share_type.SUCCESSOR if share_type.SUCCESSOR is not None else share_type).VOTING_VERSION,
-                    payee=self.current_work.value['payee'],
-                    payee_amount=self.current_work.value['payee_amount'],
+                    payment_amount=self.current_work.value['payment_amount'],
+                    packed_payments=self.current_work.value['packed_payments'],
                 ),
                 block_target=self.current_work.value['bits'].target,
                 desired_timestamp=int(time.time() + 0.5),
@@ -333,8 +332,7 @@ class WorkerBridge(worker_interface.WorkerBridge):
                 desired_other_transaction_hashes_and_fees=zip(tx_hashes, self.current_work.value['transaction_fees']),
                 net=self.node.net,
                 known_txs=tx_map,
-                base_subsidy=self.node.net.PARENT.SUBSIDY_FUNC(self.current_work.value['bits'].bits, self.current_work.value['height']),
-                payee_address=self.current_work.value['payee_address'],
+                base_subsidy=self.current_work.value['subsidy'],
             )
 
         packed_gentx = dash_data.tx_type.pack(gentx)
@@ -364,9 +362,11 @@ class WorkerBridge(worker_interface.WorkerBridge):
         else:
             current_time = time.time()
             if (current_time - print_throttle) > 5.0:
-                print 'New work for worker! Difficulty: %.06f Share difficulty: %.06f Total block value: %.6f %s including %i transactions' % (
+                print 'New work for worker %s! Difficulty: %.06f Share difficulty: %.06f Block %s Total value: %.6f %s including %i transactions' % (
+                    dash_data.pubkey_hash_to_address(pubkey_hash, self.node.net.PARENT),
                     dash_data.target_to_difficulty(target),
                     dash_data.target_to_difficulty(share_info['bits'].target),
+                    self.current_work.value['height'],
                     self.current_work.value['subsidy']*1e-8, self.node.net.PARENT.SYMBOL,
                     len(self.current_work.value['transactions']),
                 )
@@ -376,7 +376,7 @@ class WorkerBridge(worker_interface.WorkerBridge):
         self.last_work_shares.value[dash_data.pubkey_hash_to_address(pubkey_hash, self.node.net.PARENT)]=share_info['bits']
 
         ba = dict(
-            version=min(self.current_work.value['version'], 3),
+            version=self.current_work.value['version'],
             previous_block=self.current_work.value['previous_block'],
             merkle_link=merkle_link,
             coinb1=packed_gentx[:-self.COINBASE_NONCE_LENGTH-4],
@@ -397,10 +397,7 @@ class WorkerBridge(worker_interface.WorkerBridge):
             pow_hash = self.node.net.PARENT.POW_FUNC(dash_data.block_header_type.pack(header))
             try:
                 if pow_hash <= header['bits'].target or p2pool.DEBUG:
-                    if self.node.dashd_work.value['masternode_payments']:
-                        helper.submit_block(dict(header=header, txs=[new_gentx] + other_transactions, votes=self.node.dashd_work.value['votes']), False, self.node.factory, self.node.dashd, self.node.dashd_work, self.node.net)
-                    else:
-                        helper.submit_block(dict(header=header, txs=[new_gentx] + other_transactions), False, self.node.factory, self.node.dashd, self.node.dashd_work, self.node.net)
+                    helper.submit_block(dict(header=header, txs=[new_gentx] + other_transactions), False, self.node.factory, self.node.dashd, self.node.dashd_work, self.node.net)
                     if pow_hash <= header['bits'].target:
                         print
                         print 'GOT BLOCK FROM MINER! Passing to dashd! %s%064x' % (self.node.net.PARENT.BLOCK_EXPLORER_URL_PREFIX, header_hash)

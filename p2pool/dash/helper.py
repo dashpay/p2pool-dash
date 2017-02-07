@@ -14,12 +14,12 @@ def check(dashd, net):
         print >>sys.stderr, "    Check failed! Make sure that you're connected to the right dashd with --dashd-rpc-port!"
         raise deferral.RetrySilentlyException()
     if not net.VERSION_CHECK((yield dashd.rpc_getinfo())['version']):
-        print >>sys.stderr, '    dash version too old! Upgrade to 0.11.2.17 or newer!'
+        print >>sys.stderr, '    dash version too old! Upgrade to 0.12.1.0 or newer!'
         raise deferral.RetrySilentlyException()
 
 @deferral.retry('Error getting work from dashd:', 3)
 @defer.inlineCallbacks
-def getwork(dashd, net, use_getblocktemplate=False):
+def getwork(dashd, net, use_getblocktemplate=True):
     def go():
         if use_getblocktemplate:
             return dashd.rpc_getblocktemplate(dict(mode='template'))
@@ -38,12 +38,35 @@ def getwork(dashd, net, use_getblocktemplate=False):
         except jsonrpc.Error_for_code(-32601): # Method not found
             print >>sys.stderr, 'Error: dash version too old! Upgrade to v0.11.2.17 or newer!'
             raise deferral.RetrySilentlyException()
-    packed_transactions = [(x['data'] if isinstance(x, dict) else x).decode('hex') for x in work['transactions']]
-    packed_votes = [(x['data'] if isinstance(x, dict) else x).decode('hex') for x in work['votes']]
+
+    if work['transactions']:
+        packed_transactions = [(x['data'] if isinstance(x, dict) else x).decode('hex') for x in work['transactions']]
+    else:
+        packed_transactions = [ ]
     if 'height' not in work:
         work['height'] = (yield dashd.rpc_getblock(work['previousblockhash']))['height'] + 1
     elif p2pool.DEBUG:
         assert work['height'] == (yield dashd.rpc_getblock(work['previousblockhash']))['height'] + 1
+
+    # Dash Payments
+    packed_payments = []
+    payment_amount = 0
+    if 'payee' in work['masternode']:
+        g={}
+        g['payee']=str(work['masternode']['payee'])
+        g['amount']=work['masternode']['amount']
+        if g['amount'] > 0:
+            payment_amount += g['amount']
+            packed_payments.append(g)
+    elif work['superblock']:
+        for obj in work['superblock']:
+                g={}
+                g['payee']=str(obj['payee'])
+                g['amount']=obj['amount']
+                if g['amount'] > 0:
+                    payment_amount += g['amount']
+                    packed_payments.append(g)
+
     defer.returnValue(dict(
         version=work['version'],
         previous_block=int(work['previousblockhash'], 16),
@@ -58,11 +81,8 @@ def getwork(dashd, net, use_getblocktemplate=False):
         last_update=time.time(),
         use_getblocktemplate=use_getblocktemplate,
         latency=end - start,
-        votes=map(dash_data.vote_type.unpack, packed_votes),
-        payee=dash_data.address_to_pubkey_hash(work['payee'], net.PARENT) if (work['payee'] != '') else None,
-        payee_address=work['payee'].strip() if (work['payee'] != '') else None,
-        masternode_payments=work['masternode_payments'],
-        payee_amount=work['payee_amount'] if (work['payee_amount'] != '') else work['coinbasevalue'] / 5,
+        payment_amount = payment_amount,
+        packed_payments = packed_payments,
     ))
 
 @deferral.retry('Error submitting primary block: (will retry)', 10, 10)
@@ -89,5 +109,5 @@ def submit_block_rpc(block, ignore_failure, dashd, dashd_work, net):
         print >>sys.stderr, 'Block submittal result: %s (%r) Expected: %s' % (success, result, success_expected)
 
 def submit_block(block, ignore_failure, factory, dashd, dashd_work, net):
-    submit_block_p2p(block, factory, net)
     submit_block_rpc(block, ignore_failure, dashd, dashd_work, net)
+    submit_block_p2p(block, factory, net)

@@ -15,14 +15,14 @@ from p2pool.util import deferral, jsonrpc, math, variable
 
 class dashd(object): # can be used as p2p factory, p2p protocol, or rpc jsonrpc proxy
     def __init__(self):
-        self.blocks = [0x000000000000016c169477c25421250ec5d32cf9c6d38538b5de970a2355fd89]
-        self.headers = {0x16c169477c25421250ec5d32cf9c6d38538b5de970a2355fd89: {
-            'nonce': 1853158954,
-            'timestamp': 1351658517,
-            'merkle_root': 2282849479936278423916707524932131168473430114569971665822757638339486597658L,
-            'version': 1,
+        self.blocks = [0x00000000000132b9afeca5e9a2fdf4477338df6dcff1342300240bc70397c4bb]
+        self.headers = {0x132b9afeca5e9a2fdf4477338df6dcff1342300240bc70397c4bb: {
+            'nonce': 2093330011,
+            'timestamp': 1452288263,
+            'merkle_root': 0x43dda83285fae26de9a97331f617392261c77495debe97b7e18b1faf38d1ef8,
+            'version': 3,
             'previous_block': 1048610514577342396345362905164852351970507722694242579238530L,
-            'bits': dash_data.FloatingInteger(bits=0x1a0513c5, target=0x513c50000000000000000000000000000000000000000000000L),
+            'bits': dash_data.FloatingInteger(bits=0x1b0d642e, target=0x44b9f20000000000000000000000000000000000000000000000L),
         }}
         
         self.conn = variable.Variable(self)
@@ -94,7 +94,7 @@ class dashd(object): # can be used as p2p factory, p2p protocol, or rpc jsonrpc 
                 "flags" : "062f503253482f"
             },
             "coinbasevalue" : 5000000000 + sum(tx['fee'] for tx in txs),
-            "target" : "0000000000000513c50000000000000000000000000000000000000000000000",
+            "target" : "00000000000044b9f20000000000000000000000000000000000000000000000",
             "mintime" : 1351655621,
             "mutable" : [
                 "time",
@@ -125,7 +125,7 @@ class mm_provider(object):
 
 mynet = math.Object(
     NAME='mynet',
-    PARENT=networks.nets['litecoin_testnet'],
+    PARENT=networks.nets['dash'],
     SHARE_PERIOD=5, # seconds
     CHAIN_LENGTH=20*60//3, # shares
     REAL_CHAIN_LENGTH=20*60//3, # shares

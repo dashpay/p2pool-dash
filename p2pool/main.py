@@ -64,7 +64,7 @@ class keypool():
 
     def paytotal(self):
         self.payouttotal = 0.0
-        for i in range(len(pubkeys.keys)):
+        for i in xrange(len(pubkeys.keys)):
             self.payouttotal += node.get_current_txouts().get(dash_data.pubkey_hash_to_script2(pubkeys.keys[i]), 0)*1e-8
         return self.payouttotal
 
@@ -196,7 +196,7 @@ def main(args, net, datadir_path, merged_urls, worker_endpoint):
 
                 def paytotal(self):
                     self.payouttotal = 0.0
-                    for i in range(len(pubkeys.keys)):
+                    for i in xrange(len(pubkeys.keys)):
                         self.payouttotal += node.get_current_txouts().get(dash_data.pubkey_hash_to_script2(pubkeys.keys[i]), 0)*1e-8
                     return self.payouttotal
 
@@ -204,7 +204,7 @@ def main(args, net, datadir_path, merged_urls, worker_endpoint):
                     return self.payouttotal
 
             pubkeys = keypool()
-            for i in range(args.numaddresses):
+            for i in xrange(args.numaddresses):
                 address = yield deferral.retry('Error getting a dynamic address from dashd:', 5)(lambda: dashd.rpc_getnewaddress('p2pool'))()
                 new_pubkey = dash_data.address_to_pubkey_hash(address, net.PARENT)
                 pubkeys.addkey(new_pubkey)
@@ -213,7 +213,7 @@ def main(args, net, datadir_path, merged_urls, worker_endpoint):
 
             my_pubkey_hash = pubkeys.keys[0]
 
-            for i in range(len(pubkeys.keys)):
+            for i in xrange(len(pubkeys.keys)):
                 print '    ...payout %d: %s' % (i, dash_data.pubkey_hash_to_address(pubkeys.keys[i], net.PARENT),)
         
         print "Loading shares..."
@@ -327,7 +327,7 @@ def main(args, net, datadir_path, merged_urls, worker_endpoint):
         print 'Listening for workers on %r port %i...' % (worker_endpoint[0], worker_endpoint[1])
         
         wb = work.WorkerBridge(node, my_pubkey_hash, args.donation_percentage, merged_urls, args.worker_fee, args, pubkeys, dashd)
-        web_root = web.get_web_root(wb, datadir_path, dashd_getinfo_var)
+        web_root = web.get_web_root(wb, datadir_path, dashd_getinfo_var, static_dir=args.web_static)
         caching_wb = worker_interface.CachingWorkerBridge(wb)
         worker_interface.WorkerInterface(caching_wb).attach_to(web_root, get_handler=lambda request: request.redirect('/static/'))
         web_serverfactory = server.Site(web_root)
@@ -440,7 +440,7 @@ def main(args, net, datadir_path, merged_urls, worker_endpoint):
                         
                         paystr = ''
                         paytot = 0.0
-                        for i in range(len(pubkeys.keys)):
+                        for i in xrange(len(pubkeys.keys)):
                             curtot = node.get_current_txouts().get(dash_data.pubkey_hash_to_script2(pubkeys.keys[i]), 0)
                             paytot += curtot*1e-8
                             paystr += "(%.4f)" % (curtot*1e-8,)
@@ -510,6 +510,9 @@ def run():
     parser.add_argument('--logfile',
         help='''log to this file (default: data/<NET>/log)''',
         type=str, action='store', default=None, dest='logfile')
+    parser.add_argument('--web-static',
+        help='use an alternative web frontend in this directory (otherwise use the built-in frontend)',
+        type=str, action='store', default=None, dest='web_static')
     parser.add_argument('--merged',
         help='call getauxblock on this url to get work for merged mining (example: http://ncuser:ncpass@127.0.0.1:10332/)',
         type=str, action='append', default=[], dest='merged_urls')
@@ -655,7 +658,7 @@ def run():
     if args.address is not None and args.address != 'dynamic':
         try:
             args.pubkey_hash = dash_data.address_to_pubkey_hash(args.address, net.PARENT)
-        except Exception, e:
+        except Exception as e:
             parser.error('error parsing address: ' + repr(e))
     else:
         args.pubkey_hash = None

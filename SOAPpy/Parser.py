@@ -418,7 +418,7 @@ class SOAPParser(xml.sax.handler.ContentHandler):
             break
 
         if isinstance(data, compoundType):
-            for i in range(len(cur)):
+            for i in xrange(len(cur)):
                 v = cur.contents[i]
                 data._addItem(cur.names[i], v, cur.subattrs[i])
 
@@ -675,7 +675,7 @@ class SOAPParser(xml.sax.handler.ContentHandler):
 
                 f = f[1:]
 
-                for i in range(len(f)):
+                for i in xrange(len(f)):
                     s = d[f[i]]
 
                     if s != None:
@@ -698,7 +698,7 @@ class SOAPParser(xml.sax.handler.ContentHandler):
                 return tuple(r)
 
             if kind == 'recurringInstant':
-                for i in range(len(f)):
+                for i in xrange(len(f)):
                     s = d[f[i]]
 
                     if s == None or s == '-':
@@ -736,7 +736,7 @@ class SOAPParser(xml.sax.handler.ContentHandler):
 
             r = [0, 0, 1, 1, 0, 0, 0]
 
-            for i in range(len(f)):
+            for i in xrange(len(f)):
                 field = f[i]
 
                 s = d.get(field)
@@ -780,7 +780,7 @@ class SOAPParser(xml.sax.handler.ContentHandler):
 
             s = []
 
-            for i in range(1, len(f)):
+            for i in xrange(1, len(f)):
                 if d.has_key(f[i]):
                     s.append(r[i - 1])
 

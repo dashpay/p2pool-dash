@@ -589,7 +589,7 @@ class SOAPBuilder:
 
             # first write out items with order information
             if hasattr(obj, '_keyord'):
-                for i in range(len(obj._keyord)):
+                for i in xrange(len(obj._keyord)):
                     self.dump(obj._aslist(i), obj._keyord[i], 1, ns_map)
                     keylist.remove(obj._keyord[i])
 

@@ -108,12 +108,6 @@ tx_type = pack.ComposedType([
     ('lock_time', pack.IntType(32)),
 ])
 
-vote_type = pack.ComposedType([
-    ('block_height', pack.IntType(64)),
-    ('pubkey', pack.VarStrType()),
-    ('votes', pack.IntType(32)),
-])
-
 merkle_link_type = pack.ComposedType([
     ('branch', pack.ListType(pack.IntType(256))),
     ('index', pack.IntType(32)),
@@ -137,7 +131,6 @@ block_header_type = pack.ComposedType([
 block_type = pack.ComposedType([
     ('header', block_header_type),
     ('txs', pack.ListType(tx_type)),
-    ('votes', pack.ListType(vote_type)),
 ])
 
 block_type_old = pack.ComposedType([
