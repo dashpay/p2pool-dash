@@ -130,6 +130,7 @@ class Share(object):
         
         new_transaction_hashes = []
         new_transaction_size = 0
+        all_transaction_size = 0
         transaction_hash_refs = []
         other_transaction_hashes = []
         
@@ -142,17 +143,23 @@ class Share(object):
         for tx_hash, fee in desired_other_transaction_hashes_and_fees:
             if tx_hash in tx_hash_to_this:
                 this = tx_hash_to_this[tx_hash]
+                if known_txs is not None:
+                    all_transaction_size += bitcoin_data.tx_type.packed_size(known_txs[tx_hash])
             else:
                 if known_txs is not None:
                     this_size = dash_data.tx_type.packed_size(known_txs[tx_hash])
                     #if new_transaction_size + this_size > 50000: # only allow 50 kB of new txns/share
                     #    break
                     new_transaction_size += this_size
+                    all_transaction_size += this_size
                 new_transaction_hashes.append(tx_hash)
                 this = [0, len(new_transaction_hashes)-1]
             transaction_hash_refs.extend(this)
             other_transaction_hashes.append(tx_hash)
         
+        print "Generating a share with %i bytes (%i new) and %i transactions (%i new)" % \
+           (all_transaction_size, new_transaction_size, len(other_transaction_hashes)+len(new_transaction_hashes), len(new_transaction_hashes))
+
         included_transactions = set(other_transaction_hashes)
         removed_fees = [fee for tx_hash, fee in desired_other_transaction_hashes_and_fees if tx_hash not in included_transactions]
         definite_fees = sum(0 if fee is None else fee for tx_hash, fee in desired_other_transaction_hashes_and_fees if tx_hash in included_transactions)
