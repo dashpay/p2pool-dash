@@ -129,7 +129,7 @@ def cleanDate(d, first = 0):
     if len(d) != 6:
         raise ValueError, "date must have 6 elements"
 
-    for i in xrange(first, 6):
+    for i in range(first, 6):
         s = d[i]
 
         if type(s) == FloatType:

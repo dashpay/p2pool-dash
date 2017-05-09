@@ -125,12 +125,12 @@ class Proxy:
             print "Method Name:", key.ljust(15)
             print
             inps = method.inparams
-            for parm in xrange(len(inps)):
+            for parm in range(len(inps)):
                 details = inps[parm]
                 print "   In #%d: %s  (%s)" % (parm, details.name, details.type)
             print
             outps = method.outparams
-            for parm in xrange(len(outps)):
+            for parm in range(len(outps)):
                 details = outps[parm]
                 print "   Out #%d: %s  (%s)" % (parm, details.name, details.type)
             print
