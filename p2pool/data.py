@@ -144,7 +144,7 @@ class Share(object):
             if tx_hash in tx_hash_to_this:
                 this = tx_hash_to_this[tx_hash]
                 if known_txs is not None:
-                    all_transaction_size += bitcoin_data.tx_type.packed_size(known_txs[tx_hash])
+                    all_transaction_size += dash_data.tx_type.packed_size(known_txs[tx_hash])
             else:
                 if known_txs is not None:
                     this_size = dash_data.tx_type.packed_size(known_txs[tx_hash])
