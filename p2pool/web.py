@@ -348,7 +348,7 @@ def get_web_root(wb, datadir_path, dashd_getinfo_var, stop_event=variable.Event(
         if int(share_hash_str, 16) not in node.tracker.items:
             return None
         share = node.tracker.items[int(share_hash_str, 16)]
-        return bitcoin_data.script2_to_address(share.new_script, node.net.PARENT)
+        return dash_data.script2_to_address(share.new_script, node.net.PARENT)
 
     new_root.putChild('payout_address', WebInterface(lambda share_hash_str: get_share_address(share_hash_str)))
     new_root.putChild('share', WebInterface(lambda share_hash_str: get_share(share_hash_str)))
