@@ -169,11 +169,12 @@ class Share(object):
             assert base_subsidy is not None
             share_data = dict(share_data, subsidy=base_subsidy + definite_fees)
         
-        weights, total_weight, donation_weight = tracker.get_cumulative_weights(previous_share.share_data['previous_share_hash'] if previous_share is not None else None,
-            max(0, min(height, net.REAL_CHAIN_LENGTH) - 1),
-            65535*net.SPREAD*dash_data.target_to_average_attempts(block_target),
-        )
-        assert total_weight == sum(weights.itervalues()) + donation_weight, (total_weight, sum(weights.itervalues()) + donation_weight)
+        if previous_share is not None:
+          weights, total_weight, donation_weight = tracker.get_cumulative_weights(previous_share.share_data['previous_share_hash'] if previous_share is not None else None,
+              max(0, min(height, net.REAL_CHAIN_LENGTH) - 1),
+              65535*net.SPREAD*dash_data.target_to_average_attempts(block_target),
+          )
+          assert total_weight == sum(weights.itervalues()) + donation_weight, (total_weight, sum(weights.itervalues()) + donation_weight)
         
         worker_payout = share_data['subsidy']
         
@@ -187,9 +188,14 @@ class Share(object):
                     payments_tx += [dict(value=pm_payout, script=pm_script)]
                     worker_payout -= pm_payout
 
-        amounts = dict((script, worker_payout*(49*weight)//(50*total_weight)) for script, weight in weights.iteritems()) # 98% goes according to weights prior to this share
         this_script = dash_data.pubkey_hash_to_script2(share_data['pubkey_hash'])
-        amounts[this_script] = amounts.get(this_script, 0) + worker_payout//50 # 2% goes to block finder
+        if previous_share is not None:
+          amounts = dict((script, worker_payout*(49*weight)//(50*total_weight)) for script, weight in weights.iteritems()) # 98% goes according to weights prior to this share
+          amounts[this_script] = amounts.get(this_script, 0) + worker_payout//50 # 2% goes to block finder
+        else:
+          amounts = {this_script: worker_payout, DONATION_SCRIPT: 0}
+          #amounts[this_script] = worker_payout
+
         amounts[DONATION_SCRIPT] = amounts.get(DONATION_SCRIPT, 0) + worker_payout - sum(amounts.itervalues()) # all that's left over is the donation weight and some extra satoshis due to rounding
         
         if sum(amounts.itervalues()) != worker_payout or any(x < 0 for x in amounts.itervalues()):
@@ -212,15 +218,16 @@ class Share(object):
             abswork=((previous_share.abswork if previous_share is not None else 0) + dash_data.target_to_average_attempts(bits.target)) % 2**128,
         )
 
-        if desired_timestamp > previous_share.timestamp + 180:
-            print "Warning: Previous share's timestamp is %i seconds old." % int(desired_timestamp - previous_share.timestamp)
-            print "Make sure your system clock is accurate, and ensure that you're connected to decent peers."
-            print "If your clock is more than 300 seconds behind, it can result in orphaned shares."
-            print "(It's also possible that this share is just taking a long time to mine.)"
-        if previous_share.timestamp > int(time.mktime(time.gmtime()) - time.mktime(time.gmtime(0))) + 3:
-            print "WARNING! Previous share's timestamp is %i seconds in the future. This is not normal." % \
-                   int(previous_share.timestamp - (int(time.mktime(time.gmtime()) - time.mktime(time.gmtime(0)))))
-            print "Make sure your system clock is accurate. Errors beyond 300 sec result in orphaned shares."
+        if previous_share is not None:
+          if desired_timestamp > previous_share.timestamp + 180:
+              print "Warning: Previous share's timestamp is %i seconds old." % int(desired_timestamp - previous_share.timestamp)
+              print "Make sure your system clock is accurate, and ensure that you're connected to decent peers."
+              print "If your clock is more than 300 seconds behind, it can result in orphaned shares."
+              print "(It's also possible that this share is just taking a long time to mine.)"
+          if previous_share.timestamp > int(time.mktime(time.gmtime()) - time.mktime(time.gmtime(0))) + 3:
+              print "WARNING! Previous share's timestamp is %i seconds in the future. This is not normal." % \
+                     int(previous_share.timestamp - (int(time.mktime(time.gmtime()) - time.mktime(time.gmtime(0)))))
+              print "Make sure your system clock is accurate. Errors beyond 300 sec result in orphaned shares."
         
         gentx = dict(
             version=1,
