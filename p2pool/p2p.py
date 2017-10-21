@@ -449,7 +449,7 @@ class Protocol(p2protocol.Protocol):
             self.remembered_txs[tx_hash] = tx
             self.remembered_txs_size += 100 + dash_data.tx_type.packed_size(tx)
             added_known_txs[tx_hash] = tx
-        self.node.known_txs_var.add(added_known_txs)
+        # self.node.known_txs_var.add(added_known_txs)
         if self.remembered_txs_size >= self.max_remembered_txs_size:
             raise PeerMisbehavingError('too much transaction data stored')
     message_forget_tx = pack.ComposedType([
