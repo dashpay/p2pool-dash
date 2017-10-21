@@ -109,5 +109,5 @@ def submit_block_rpc(block, ignore_failure, dashd, dashd_work, net):
         print >>sys.stderr, 'Block submittal result: %s (%r) Expected: %s' % (success, result, success_expected)
 
 def submit_block(block, ignore_failure, factory, dashd, dashd_work, net):
-    submit_block_rpc(block, ignore_failure, dashd, dashd_work, net)
     submit_block_p2p(block, factory, net)
+    submit_block_rpc(block, ignore_failure, dashd, dashd_work, net)
