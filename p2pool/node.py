@@ -40,7 +40,7 @@ class P2PNode(p2p.Node):
             
             self.node.tracker.add(share)
         
-        self.node.known_txs_var.add(all_new_txs)
+        # self.node.known_txs_var.add(all_new_txs)
         
         if new_count:
             self.node.set_best_share()
@@ -270,6 +270,7 @@ class Node(object):
             print
             print 'GOT BLOCK FROM PEER! Passing to dashd! %s dash: %s%064x' % (p2pool_data.format_hash(share.hash), self.net.PARENT.BLOCK_EXPLORER_URL_PREFIX, share.header_hash)
             print
+            self.factory.new_block.happened(share.hash)
         
         def forget_old_txs():
             new_known_txs = {}

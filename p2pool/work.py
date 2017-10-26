@@ -102,6 +102,8 @@ class WorkerBridge(worker_interface.WorkerBridge):
             if bb is not None and bb['previous_block'] == t['previous_block'] and self.node.net.PARENT.POW_FUNC(dash_data.block_header_type.pack(bb)) <= t['bits'].target:
                 print 'Skipping from block %x to block %x! NewHeight=%s' % (bb['previous_block'],
                     self.node.net.PARENT.BLOCKHASH_FUNC(dash_data.block_header_type.pack(bb)),t['height']+1,)
+                '''
+                # New block template from Dash daemon only
                 t = dict(
                     version=bb['version'],
                     previous_block=self.node.net.PARENT.BLOCKHASH_FUNC(dash_data.block_header_type.pack(bb)),
@@ -117,6 +119,7 @@ class WorkerBridge(worker_interface.WorkerBridge):
                     payment_amount=self.node.dashd_work.value['payment_amount'],
                     packed_payments=self.node.dashd_work.value['packed_payments'],
                 )
+                '''
 
             self.current_work.set(t)
         self.node.dashd_work.changed.watch(lambda _: compute_work())
@@ -402,6 +405,8 @@ class WorkerBridge(worker_interface.WorkerBridge):
                         print
                         print 'GOT BLOCK FROM MINER! Passing to dashd! %s%064x' % (self.node.net.PARENT.BLOCK_EXPLORER_URL_PREFIX, header_hash)
                         print
+                        # New block found
+                        self.node.factory.new_block.happened(header_hash)
             except:
                 log.err(None, 'Error while processing potential block:')
 
