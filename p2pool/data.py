@@ -376,7 +376,7 @@ class Share(object):
             pass
         else:
             all_txs_size = sum(dash_data.tx_type.packed_size(tx) for tx in other_txs)
-            if all_txs_size > 1000000:
+            if all_txs_size > 2000000:
                 return True, 'txs over block size limit'
             
             new_txs_size = sum(dash_data.tx_type.packed_size(known_txs[tx_hash]) for tx_hash in self.share_info['new_transaction_hashes'])
