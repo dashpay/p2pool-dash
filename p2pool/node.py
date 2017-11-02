@@ -40,7 +40,7 @@ class P2PNode(p2p.Node):
             
             self.node.tracker.add(share)
         
-        # self.node.known_txs_var.add(all_new_txs)
+        self.node.known_txs_var.add(all_new_txs)
         
         if new_count:
             self.node.set_best_share()
