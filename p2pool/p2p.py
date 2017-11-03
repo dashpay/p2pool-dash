@@ -334,7 +334,7 @@ class Protocol(p2protocol.Protocol):
                 for tx_hash in share.share_info['new_transaction_hashes']:
                     # assert tx_hash in known_txs, 'tried to broadcast share without knowing all its new transactions'
                     if tx_hash not in known_txs:
-                        print "WARN: Tried to broadcast share without knowing transaction %s" % (tx_hash)
+                        print "WARN: Tried to broadcast share without knowing transaction %064x" % (tx_hash)
                     if tx_hash not in self.remote_tx_hashes:
                         tx_hashes.add(tx_hash)
                 continue
