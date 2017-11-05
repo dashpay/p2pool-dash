@@ -27,7 +27,7 @@ def fragment(f, **kwargs):
 class Protocol(p2protocol.Protocol):
     VERSION = 1500
     
-    max_remembered_txs_size = 2500000
+    max_remembered_txs_size = 5000000
     
     def __init__(self, node, incoming):
         p2protocol.Protocol.__init__(self, node.net.PREFIX, 2000000, node.traffic_happened)
