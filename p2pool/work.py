@@ -287,15 +287,17 @@ class WorkerBridge(worker_interface.WorkerBridge):
                     share_type = successor_type
                 else:
                     share_type = previous_share_type
+        local_addr_rates = self.get_local_addr_rates()
 
         if desired_share_target is None:
             desired_share_target = 2**256-1
-            local_hash_rate = self._estimate_local_hash_rate()
-            if local_hash_rate is not None:
+            local_hash_rate = local_addr_rates.get(pubkey_hash, 0)
+            if local_hash_rate > 0.0:
                 desired_share_target = min(desired_share_target,
                     dash_data.average_attempts_to_target(local_hash_rate * self.node.net.SHARE_PERIOD / 0.0167)) # limit to 1.67% of pool shares by modulating share difficulty
 
-            local_addr_rates = self.get_local_addr_rates()
+
+
             lookbehind = 3600//self.node.net.SHARE_PERIOD
             block_subsidy = self.node.dashd_work.value['subsidy']
             if previous_share is not None and self.node.tracker.get_height(previous_share.hash) > lookbehind:
@@ -365,11 +367,11 @@ class WorkerBridge(worker_interface.WorkerBridge):
         else:
             current_time = time.time()
             if (current_time - print_throttle) > 5.0:
-                print 'New work for worker %s! Difficulty: %.06f Share difficulty: %.06f Block %s Total value: %.6f %s including %i transactions' % (
+                print 'New work for worker %s! Difficulty: %.06f Share difficulty: %.06f (speed %.06f) Total block value: %.6f %s including %i transactions' % (
                     dash_data.pubkey_hash_to_address(pubkey_hash, self.node.net.PARENT),
                     dash_data.target_to_difficulty(target),
                     dash_data.target_to_difficulty(share_info['bits'].target),
-                    self.current_work.value['height'],
+                    local_addr_rates.get(pubkey_hash, 0),
                     self.current_work.value['subsidy']*1e-8, self.node.net.PARENT.SYMBOL,
                     len(self.current_work.value['transactions']),
                 )
