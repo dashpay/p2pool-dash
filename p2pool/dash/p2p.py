@@ -74,8 +74,8 @@ class Protocol(p2protocol.Protocol):
         for inv in invs:
             if inv['type'] == 'block':
                 self.factory.new_block.happened(inv['hash'])
-            # elif inv['type'] == 'tx':
-            #     self.send_getdata(requests=[inv])
+            elif inv['type'] == 'tx':
+                self.send_getdata(requests=[inv])
             else:
                 if p2pool.DEBUG:
                     print 'Unneeded inv type', inv

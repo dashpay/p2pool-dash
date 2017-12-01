@@ -332,7 +332,9 @@ class Protocol(p2protocol.Protocol):
             if share.VERSION >= 13:
                 # send full transaction for every new_transaction_hash that peer does not know
                 for tx_hash in share.share_info['new_transaction_hashes']:
-                    assert tx_hash in known_txs, 'tried to broadcast share without knowing all its new transactions'
+                    # assert tx_hash in known_txs, 'tried to broadcast share without knowing all its new transactions'
+                    if tx_hash not in known_txs:
+                        print "WARN: Tried to broadcast share without knowing transaction %064x" % (tx_hash)
                     if tx_hash not in self.remote_tx_hashes:
                         tx_hashes.add(tx_hash)
                 continue
@@ -449,7 +451,7 @@ class Protocol(p2protocol.Protocol):
             self.remembered_txs[tx_hash] = tx
             self.remembered_txs_size += 100 + dash_data.tx_type.packed_size(tx)
             added_known_txs[tx_hash] = tx
-        # self.node.known_txs_var.add(added_known_txs)
+        self.node.known_txs_var.add(added_known_txs)
         if self.remembered_txs_size >= self.max_remembered_txs_size:
             raise PeerMisbehavingError('too much transaction data stored')
     message_forget_tx = pack.ComposedType([
