@@ -633,9 +633,9 @@ def get_warnings(tracker, best_share, net, dashd_getinfo, dashd_work_value):
             'An upgrade is likely necessary. Check http://p2pool.forre.st/ for more information.' % (
                 majority_desired_version, 100*desired_version_counts[majority_desired_version]/sum(desired_version_counts.itervalues())))
     
-    if dashd_getinfo['errors'] != '':
-        if 'This is a pre-release test build' not in dashd_getinfo['errors']:
-            res.append('(from dashd) %s' % (dashd_getinfo['errors'],))
+    if dashd_getinfo['warnings'] != '':
+        if 'This is a pre-release test build' not in dashd_getinfo['warnings']:
+            res.append('(from dashd) %s' % (dashd_getinfo['warnings'],))
     
     version_warning = getattr(net, 'VERSION_WARNING', lambda v: None)(dashd_getinfo['version'])
     if version_warning is not None:
