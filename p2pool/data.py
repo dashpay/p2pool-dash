@@ -622,7 +622,7 @@ def get_desired_version_counts(tracker, best_share_hash, dist):
         res[share.desired_version] = res.get(share.desired_version, 0) + dash_data.target_to_average_attempts(share.target)
     return res
 
-def get_warnings(tracker, best_share, net, dashd_getinfo, dashd_work_value):
+def get_warnings(tracker, best_share, net, dashd_getnetworkinfo, dashd_work_value):
     res = []
     
     desired_version_counts = get_desired_version_counts(tracker, best_share,
@@ -633,11 +633,11 @@ def get_warnings(tracker, best_share, net, dashd_getinfo, dashd_work_value):
             'An upgrade is likely necessary. Check http://p2pool.forre.st/ for more information.' % (
                 majority_desired_version, 100*desired_version_counts[majority_desired_version]/sum(desired_version_counts.itervalues())))
     
-    if dashd_getinfo['errors'] != '':
-        if 'This is a pre-release test build' not in dashd_getinfo['errors']:
-            res.append('(from dashd) %s' % (dashd_getinfo['errors'],))
+    if dashd_getnetworkinfo['warnings'] != '':
+        if 'This is a pre-release test build' not in dashd_getnetworkinfo['warnings']:
+            res.append('(from dashd) %s' % (dashd_getnetworkinfo['warnings'],))
     
-    version_warning = getattr(net, 'VERSION_WARNING', lambda v: None)(dashd_getinfo['version'])
+    version_warning = getattr(net, 'VERSION_WARNING', lambda v: None)(dashd_getnetworkinfo['version'])
     if version_warning is not None:
         res.append(version_warning)
     
