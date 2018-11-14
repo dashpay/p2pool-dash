@@ -69,6 +69,10 @@ def getwork(dashd, net, use_getblocktemplate=True):
             payment_amount += g['amount']
             packed_payments.append(g)
 
+    coinbase_payload = None
+    if 'coinbase_payload' in work and len(work['coinbase_payload']) != 0:
+        coinbase_payload = work['coinbase_payload'].decode('hex')
+
     defer.returnValue(dict(
         version=work['version'],
         previous_block=int(work['previousblockhash'], 16),
@@ -85,6 +89,7 @@ def getwork(dashd, net, use_getblocktemplate=True):
         latency=end - start,
         payment_amount = payment_amount,
         packed_payments = packed_payments,
+        coinbase_payload = coinbase_payload,
     ))
 
 @deferral.retry('Error submitting primary block: (will retry)', 10, 10)
