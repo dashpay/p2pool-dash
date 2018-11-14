@@ -51,12 +51,14 @@ class Test(unittest.TestCase):
                 for i in xrange(3):
                     huge_tx = dict(
                         version=0,
+                        type=0,
                         tx_ins=[],
                         tx_outs=[dict(
                             value=0,
                             script='x'*900000,
                         )],
                         lock_time=i,
+                        payload=None,
                     )
                     new_mining_txs[dash_data.hash256(dash_data.tx_type.pack(huge_tx))] = huge_tx
                 self.mining_txs_var.set(new_mining_txs)

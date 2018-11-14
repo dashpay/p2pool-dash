@@ -210,6 +210,7 @@ class Share(object):
         
         gentx = dict(
             version=1,
+            type=0,
             tx_ins=[dict(
                 previous_output=None,
                 sequence=None,
@@ -220,6 +221,7 @@ class Share(object):
                 script='\x6a\x28' + cls.get_ref_hash(net, share_info, ref_merkle_link) + pack.IntType(64).pack(last_txout_nonce),
             )],
             lock_time=0,
+            payload=None,
         )
         
         def get_share(header, last_txout_nonce=last_txout_nonce):
