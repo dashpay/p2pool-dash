@@ -51,21 +51,23 @@ def getwork(dashd, net, use_getblocktemplate=True):
     # Dash Payments
     packed_payments = []
     payment_amount = 0
-    if 'payee' in work['masternode']:
+
+    payment_objects = []
+    if 'masternode' in work:
+        if isinstance(work['masternode'], list):
+            payment_objects += work['masternode']
+        else:
+            payment_objects += [work['masternode']]
+    if 'superblock' in work:
+        payment_objects += work['superblock']
+
+    for obj in payment_objects:
         g={}
-        g['payee']=str(work['masternode']['payee'])
-        g['amount']=work['masternode']['amount']
+        g['payee'] = str(obj['payee'])
+        g['amount'] = obj['amount']
         if g['amount'] > 0:
             payment_amount += g['amount']
             packed_payments.append(g)
-    elif work['superblock']:
-        for obj in work['superblock']:
-                g={}
-                g['payee']=str(obj['payee'])
-                g['amount']=obj['amount']
-                if g['amount'] > 0:
-                    payment_amount += g['amount']
-                    packed_payments.append(g)
 
     defer.returnValue(dict(
         version=work['version'],
