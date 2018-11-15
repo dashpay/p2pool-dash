@@ -382,7 +382,7 @@ class WorkerBridge(worker_interface.WorkerBridge):
         self.last_work_shares.value[dash_data.pubkey_hash_to_address(pubkey_hash, self.node.net.PARENT)]=share_info['bits']
 
         coinbase_payload_size = 0
-        if gentx['version'] >= 3 and gentx['type'] == 5:
+        if gentx['version'] == 3 and gentx['type'] == 5:
             coinbase_payload_size = len(pack.VarStrType().pack(gentx['payload']))
 
         ba = dict(
