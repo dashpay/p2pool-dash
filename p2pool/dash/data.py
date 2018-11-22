@@ -91,8 +91,9 @@ address_type = pack.ComposedType([
     ('port', pack.IntType(16, 'big')),
 ])
 
-tx_type = pack.ComposedType([
-    ('version', pack.IntType(32)),
+tx_type = pack.ComposedWithContextualOptionalsType([
+    ('version', pack.IntType(16)),
+    ('type', pack.IntType(16)),
     ('tx_ins', pack.ListType(pack.ComposedType([
         ('previous_output', pack.PossiblyNoneType(dict(hash=0, index=2**32 - 1), pack.ComposedType([
             ('hash', pack.IntType(256)),
@@ -106,6 +107,7 @@ tx_type = pack.ComposedType([
         ('script', pack.VarStrType()),
     ]))),
     ('lock_time', pack.IntType(32)),
+    ('payload', pack.ContextualOptionalType(pack.VarStrType(), lambda item: item['version'] == 3)),
 ])
 
 merkle_link_type = pack.ComposedType([

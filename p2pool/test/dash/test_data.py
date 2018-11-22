@@ -28,6 +28,7 @@ class Test(unittest.TestCase):
     def test_tx_hash(self):
         assert data.hash256(data.tx_type.pack(dict(
             version=1,
+            type=0,
             tx_ins=[dict(
                 previous_output=None,
                 sequence=None,
@@ -38,6 +39,7 @@ class Test(unittest.TestCase):
                 script=data.pubkey_hash_to_script2(pack.IntType(160).unpack('ca975b00a8c203b8692f5a18d92dc5c2d2ebc57b'.decode('hex'))),
             )],
             lock_time=0,
+            payload=None,
         ))) == 0xb53802b2333e828d6532059f46ecf6b313a42d79f97925e457fbbfda45367e5c
     
     def test_address_to_pubkey_hash(self):

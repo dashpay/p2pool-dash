@@ -51,21 +51,27 @@ def getwork(dashd, net, use_getblocktemplate=True):
     # Dash Payments
     packed_payments = []
     payment_amount = 0
-    if 'payee' in work['masternode']:
+
+    payment_objects = []
+    if 'masternode' in work:
+        if isinstance(work['masternode'], list):
+            payment_objects += work['masternode']
+        else:
+            payment_objects += [work['masternode']]
+    if 'superblock' in work:
+        payment_objects += work['superblock']
+
+    for obj in payment_objects:
         g={}
-        g['payee']=str(work['masternode']['payee'])
-        g['amount']=work['masternode']['amount']
+        g['payee'] = str(obj['payee'])
+        g['amount'] = obj['amount']
         if g['amount'] > 0:
             payment_amount += g['amount']
             packed_payments.append(g)
-    elif work['superblock']:
-        for obj in work['superblock']:
-                g={}
-                g['payee']=str(obj['payee'])
-                g['amount']=obj['amount']
-                if g['amount'] > 0:
-                    payment_amount += g['amount']
-                    packed_payments.append(g)
+
+    coinbase_payload = None
+    if 'coinbase_payload' in work and len(work['coinbase_payload']) != 0:
+        coinbase_payload = work['coinbase_payload'].decode('hex')
 
     defer.returnValue(dict(
         version=work['version'],
@@ -83,6 +89,7 @@ def getwork(dashd, net, use_getblocktemplate=True):
         latency=end - start,
         payment_amount = payment_amount,
         packed_payments = packed_payments,
+        coinbase_payload = coinbase_payload,
     ))
 
 @deferral.retry('Error submitting primary block: (will retry)', 10, 10)

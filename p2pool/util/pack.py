@@ -315,6 +315,62 @@ class PossiblyNoneType(Type):
             raise ValueError('none_value used')
         return self.inner.write(file, self.none_value if item is None else item)
 
+class ComposedWithContextualOptionalsType(Type):
+    def __init__(self, fields):
+        self.fields = list(fields)
+        self.field_names = set(k for k, v in fields)
+        self.record_type = get_record(k for k, v in self.fields)
+
+        self.mandatory_fields = list()
+        for key, type_ in self.fields:
+            if not isinstance(type_, ContextualOptionalType):
+                self.mandatory_fields.append((key, type_))
+        self.mandatory_field_names = set(k for k, v in self.mandatory_fields)
+
+    def read(self, file):
+        item = self.record_type()
+        for key, type_ in self.fields:
+            if isinstance(type_, ContextualOptionalType):
+                file = type_.contextual_read(file, item, key)
+            else:
+                item[key], file = type_.read(file)
+        return item, file
+
+    def write(self, file, item):
+        item_keys = item.keys()
+        for key, type_ in self.fields:
+            if isinstance(type_, ContextualOptionalType):
+                file = type_.contextual_write(file, item, key)
+            else:
+                assert key in item_keys
+                file = type_.write(file, item[key])
+        return file
+
+class ContextualOptionalType(Type):
+    def __init__(self, real_type, check_include_cb):
+        self.real_type = real_type
+        self.check_include_cb = check_include_cb
+
+    def read(self, file):
+        return self.real_type.read(file)
+
+    def write(self, file, item):
+        return self.real_type.write(file, item)
+
+    def contextual_read(self, file, parent_item, key):
+        if self.check_include_cb(parent_item):
+            parent_item[key], file = self.read(file)
+            return file
+        else:
+            parent_item[key] = None
+            return file
+
+    def contextual_write(self, file, parent_item, key):
+        if self.check_include_cb(parent_item):
+            assert key in parent_item.keys()
+            return self.write(file, parent_item[key])
+        return file
+
 class FixedStrType(Type):
     def __init__(self, length):
         self.length = length

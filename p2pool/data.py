@@ -52,7 +52,7 @@ def load_share(share, net, peer_addr):
 DONATION_SCRIPT = '41047559d13c3f81b1fadbd8dd03e4b5a1c73b05e2b980e00d467aa9440b29c7de23664dde6428d75cafed22ae4f0d302e26c5c5a5dd4d3e1b796d7281bdc9430f35ac'.decode('hex')
 
 class Share(object):
-    VERSION = 15
+    VERSION = 16
     VOTING_VERSION = 15
     SUCCESSOR = None
     
@@ -68,6 +68,7 @@ class Share(object):
         ('share_data', pack.ComposedType([
             ('previous_share_hash', pack.PossiblyNoneType(0, pack.IntType(256))),
             ('coinbase', pack.VarStrType()),
+            ('coinbase_payload', pack.PossiblyNoneType(b'', pack.VarStrType())),
             ('nonce', pack.IntType(32)),
             ('pubkey_hash', pack.IntType(160)),
             ('subsidy', pack.IntType(64)),
@@ -103,6 +104,7 @@ class Share(object):
             ('branch', pack.ListType(pack.IntType(256))),
             ('index', pack.IntType(0)), # it will always be 0
         ])),
+        ('coinbase_payload', pack.PossiblyNoneType(b'', pack.VarStrType()))
     ])
     
     ref_type = pack.ComposedType([
@@ -210,6 +212,7 @@ class Share(object):
         
         gentx = dict(
             version=1,
+            type=0,
             tx_ins=[dict(
                 previous_output=None,
                 sequence=None,
@@ -220,17 +223,35 @@ class Share(object):
                 script='\x6a\x28' + cls.get_ref_hash(net, share_info, ref_merkle_link) + pack.IntType(64).pack(last_txout_nonce),
             )],
             lock_time=0,
+            payload=None,
         )
+
+        if share_data['coinbase_payload'] is not None:
+            # DIP3/DIP4 cbtx
+            gentx['version'] = 3
+            gentx['type'] = 5
+            gentx['payload'] = share_data['coinbase_payload']
         
         def get_share(header, last_txout_nonce=last_txout_nonce):
             min_header = dict(header); del min_header['merkle_root']
+
+            packed_gentx = dash_data.tx_type.pack(gentx)
+
+            payload_start = len(packed_gentx)
+            payload = None
+            if share_data['coinbase_payload'] is not None and len(share_data['coinbase_payload']) != 0:
+                payload = pack.VarStrType().pack(share_data['coinbase_payload'])
+                payload_start -= len(payload)
+            prefix = packed_gentx[:payload_start-32-8-4]
+
             share = cls(net, None, dict(
                 min_header=min_header,
                 share_info=share_info,
                 ref_merkle_link=dict(branch=[], index=0),
                 last_txout_nonce=last_txout_nonce,
-                hash_link=prefix_to_hash_link(dash_data.tx_type.pack(gentx)[:-32-8-4], cls.gentx_before_refhash),
+                hash_link=prefix_to_hash_link(prefix, cls.gentx_before_refhash),
                 merkle_link=dash_data.calculate_merkle_link([None] + other_transaction_hashes, 0),
+                coinbase_payload=payload,
             ))
             assert share.header == header # checks merkle_root
             return share
@@ -280,10 +301,14 @@ class Share(object):
             if share_count == 0:
                 n.add(tx_count)
         assert n == set(xrange(len(self.share_info['new_transaction_hashes'])))
-        
+
+        payload = contents['coinbase_payload']
+        if payload is None:
+            payload = b''
+
         self.gentx_hash = check_hash_link(
             self.hash_link,
-            self.get_ref_hash(net, self.share_info, contents['ref_merkle_link']) + pack.IntType(64).pack(self.contents['last_txout_nonce']) + pack.IntType(32).pack(0),
+            self.get_ref_hash(net, self.share_info, contents['ref_merkle_link']) + pack.IntType(64).pack(self.contents['last_txout_nonce']) + pack.IntType(32).pack(0) + payload,
             self.gentx_before_refhash,
         )
         merkle_root = dash_data.check_merkle_link(self.gentx_hash, self.merkle_link)
