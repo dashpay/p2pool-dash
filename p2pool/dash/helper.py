@@ -63,11 +63,12 @@ def getwork(dashd, net, use_getblocktemplate=True):
 
     for obj in payment_objects:
         g={}
-        g['payee'] = str(obj['payee'])
-        g['amount'] = obj['amount']
-        if g['amount'] > 0:
-            payment_amount += g['amount']
-            packed_payments.append(g)
+        if 'payee' in obj:
+            g['payee'] = str(obj['payee'])
+            g['amount'] = obj['amount']
+            if g['amount'] > 0:
+                payment_amount += g['amount']
+                packed_payments.append(g)
 
     coinbase_payload = None
     if 'coinbase_payload' in work and len(work['coinbase_payload']) != 0:
