@@ -381,16 +381,16 @@ class WorkerBridge(worker_interface.WorkerBridge):
         #need this for stats
         self.last_work_shares.value[dash_data.pubkey_hash_to_address(pubkey_hash, self.node.net.PARENT)]=share_info['bits']
 
-        coinbase_payload_size = 0
+        coinbase_payload_data_size = 0
         if gentx['version'] == 3 and gentx['type'] == 5:
-            coinbase_payload_size = len(pack.VarStrType().pack(gentx['payload']))
+            coinbase_payload_data_size = len(pack.VarStrType().pack(gentx['extra_payload']))
 
         ba = dict(
             version=self.current_work.value['version'],
             previous_block=self.current_work.value['previous_block'],
             merkle_link=merkle_link,
-            coinb1=packed_gentx[:-coinbase_payload_size-self.COINBASE_NONCE_LENGTH-4],
-            coinb2=packed_gentx[-coinbase_payload_size-4:],
+            coinb1=packed_gentx[:-coinbase_payload_data_size-self.COINBASE_NONCE_LENGTH-4],
+            coinb2=packed_gentx[-coinbase_payload_data_size-4:],
             timestamp=self.current_work.value['time'],
             bits=self.current_work.value['bits'],
             share_target=target,
@@ -400,7 +400,7 @@ class WorkerBridge(worker_interface.WorkerBridge):
 
         def got_response(header, user, coinbase_nonce):
             assert len(coinbase_nonce) == self.COINBASE_NONCE_LENGTH
-            new_packed_gentx = packed_gentx[:-coinbase_payload_size-self.COINBASE_NONCE_LENGTH-4] + coinbase_nonce + packed_gentx[-coinbase_payload_size-4:] if coinbase_nonce != '\0'*self.COINBASE_NONCE_LENGTH else packed_gentx
+            new_packed_gentx = packed_gentx[:-coinbase_payload_data_size-self.COINBASE_NONCE_LENGTH-4] + coinbase_nonce + packed_gentx[-coinbase_payload_data_size-4:] if coinbase_nonce != '\0'*self.COINBASE_NONCE_LENGTH else packed_gentx
             new_gentx = dash_data.tx_type.unpack(new_packed_gentx) if coinbase_nonce != '\0'*self.COINBASE_NONCE_LENGTH else gentx
 
             header_hash = self.node.net.PARENT.BLOCKHASH_FUNC(dash_data.block_header_type.pack(header))
