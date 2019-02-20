@@ -126,6 +126,18 @@ class Protocol(p2protocol.Protocol):
         ('have', pack.ListType(pack.IntType(256))),
         ('last', pack.PossiblyNoneType(0, pack.IntType(256))),
     ])
+    def handle_getheaders(self, version, have, last):
+        pass
+    message_sendheaders = pack.ComposedType([])
+    def handle_sendheaders(self):
+        pass
+    message_sendcmpct = pack.ComposedType([
+        ('announce', pack.BoolType()),
+        ('version', pack.IntType(64)),
+    ])
+    def handle_sendcmpct(self, announce, version):
+        pass
+
     message_getaddr = pack.ComposedType([])
 
     message_addr = pack.ComposedType([
