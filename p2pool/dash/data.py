@@ -107,7 +107,7 @@ tx_type = pack.ComposedWithContextualOptionalsType([
         ('script', pack.VarStrType()),
     ]))),
     ('lock_time', pack.IntType(32)),
-    ('payload', pack.ContextualOptionalType(pack.VarStrType(), lambda item: item['version'] == 3)),
+    ('payload', pack.ContextualOptionalType(pack.VarStrType(), lambda item: item['version'] == 3 and item['type'] != 0)),
 ])
 
 merkle_link_type = pack.ComposedType([
