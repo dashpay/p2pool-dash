@@ -226,7 +226,7 @@ class Share(object):
             payload=None,
         )
 
-        if share_data['coinbase_payload'] is not None:
+        if share_data['coinbase_payload'] is not None and len(share_data['coinbase_payload']) != 0:
             # DIP3/DIP4 cbtx
             gentx['version'] = 3
             gentx['type'] = 5
