@@ -188,6 +188,18 @@ class Protocol(p2protocol.Protocol):
     def handle_alert(self, message, signature):
         pass # print 'ALERT:', (message, signature)
 
+    message_dsq = pack.ComposedType([
+        ('denom', pack.IntType(32)),
+        ('masternode_outpoint', pack.PossiblyNoneType(dict(hash=0, index=0), pack.ComposedType([
+            ('hash', pack.IntType(256)),
+            ('index', pack.IntType(32)),
+        ]))),
+        ('time', pack.IntType(64)),
+        ('signature', pack.PossiblyNoneType(b'', pack.VarStrType())),
+    ])
+    def handle_dsq(self, denom, masternode_outpoint, time, signature):
+        pass # print 'dsq:', (denom, masternode_outpoint, time, signature)
+
     def connectionLost(self, reason):
         if hasattr(self.factory, 'gotConnection'):
             self.factory.gotConnection(None)
