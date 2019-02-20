@@ -192,6 +192,11 @@ class StructType(Type):
     def write(self, file, item):
         return file, struct.pack(self.desc, item)
 
+class BoolType(StructType):
+    def __init__(self):
+        self.desc = "<?"
+        self.length = struct.calcsize(self.desc)
+
 @memoize.fast_memoize_multiple_args
 class IntType(Type):
     __slots__ = 'bytes step format_str max'.split(' ')
