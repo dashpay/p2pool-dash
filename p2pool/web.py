@@ -356,7 +356,7 @@ def get_web_root(wb, datadir_path, dashd_getnetworkinfo_var, stop_event=variable
     new_root.putChild('verified_heads', WebInterface(lambda: ['%064x' % x for x in node.tracker.verified.heads]))
     new_root.putChild('tails', WebInterface(lambda: ['%064x' % x for t in node.tracker.tails for x in node.tracker.reverse.get(t, set())]))
     new_root.putChild('verified_tails', WebInterface(lambda: ['%064x' % x for t in node.tracker.verified.tails for x in node.tracker.verified.reverse.get(t, set())]))
-    new_root.putChild('best_share_hash', WebInterface(lambda: '%064x' % node.best_share_var.value))
+    new_root.putChild('best_share_hash', WebInterface(lambda: '%064x' % node.best_share_var.value if node.best_share_var.value is not None else 0))
     new_root.putChild('my_share_hashes', WebInterface(lambda: ['%064x' % my_share_hash for my_share_hash in wb.my_share_hashes]))
     def get_share_data(share_hash_str):
         if int(share_hash_str, 16) not in node.tracker.items:
