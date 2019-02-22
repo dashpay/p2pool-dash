@@ -53,7 +53,7 @@ DONATION_SCRIPT = '41047559d13c3f81b1fadbd8dd03e4b5a1c73b05e2b980e00d467aa9440b2
 
 class Share(object):
     VERSION = 16
-    VOTING_VERSION = 15
+    VOTING_VERSION = 16
     SUCCESSOR = None
     
     small_block_header_type = pack.ComposedType([
@@ -655,7 +655,7 @@ def get_warnings(tracker, best_share, net, dashd_getnetworkinfo, dashd_work_valu
     majority_desired_version = max(desired_version_counts, key=lambda k: desired_version_counts[k])
     if majority_desired_version > (Share.SUCCESSOR if Share.SUCCESSOR is not None else Share).VOTING_VERSION and desired_version_counts[majority_desired_version] > sum(desired_version_counts.itervalues())/2:
         res.append('A MAJORITY OF SHARES CONTAIN A VOTE FOR AN UNSUPPORTED SHARE IMPLEMENTATION! (v%i with %i%% support)\n'
-            'An upgrade is likely necessary. Check http://p2pool.forre.st/ for more information.' % (
+            'An upgrade is likely necessary. Check https://github.com/dashpay/p2pool-dash for more information.' % (
                 majority_desired_version, 100*desired_version_counts[majority_desired_version]/sum(desired_version_counts.itervalues())))
     
     if dashd_getnetworkinfo['warnings'] != '':
