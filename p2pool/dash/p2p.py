@@ -66,7 +66,37 @@ class Protocol(p2protocol.Protocol):
     # https://github.com/dashpay/dash/blob/v0.12.1.x/src/protocol.h#L338-L362
     message_inv = pack.ComposedType([
         ('invs', pack.ListType(pack.ComposedType([
-            ('type', pack.EnumType(pack.IntType(32), {1: 'tx', 2: 'block', 3: 'filtered_block', 4: 'txlock_request', 5: 'txlock_vote', 6: 'spork', 7: 'masternode_winner', 8: 'masternode_scanning_error', 9: 'budget_vote', 10: 'budget_proposal', 11: 'budget_finalized', 12: 'budget_finalized_vote', 13: 'masternode_quorum', 14: 'masternode_announce', 15: 'masternode_ping', 16: 'dstx', 17: 'governance_object', 18: 'governance_object_vote', 19: 'masternode_verify'})),
+            ('type', pack.EnumType(pack.IntType(32), {
+                1: 'tx',
+                2: 'block',
+                3: 'filtered_block',
+                4: 'txlock_request',
+                5: 'txlock_vote',
+                6: 'spork',
+                7: 'masternode_winner',
+                8: 'masternode_scanning_error',
+                9: 'budget_vote',
+                10: 'budget_proposal',
+                11: 'budget_finalized',
+                12: 'budget_finalized_vote',
+                13: 'masternode_quorum',
+                14: 'masternode_announce',
+                15: 'masternode_ping',
+                16: 'dstx',
+                17: 'governance_object',
+                18: 'governance_object_vote',
+                19: 'masternode_verify',
+                20: 'compact_block',
+                21: 'quorum_final_commitment',
+                22: 'quorum_dummy_commitment',
+                23: 'quorum_contrib',
+                24: 'quorum_complaint',
+                25: 'quorum_justification',
+                26: 'quorum_premature_commitment',
+                27: 'quorum_debug_status',
+                28: 'quorum_recovered_sig',
+                29: 'clsig'
+            })),
             ('hash', pack.IntType(256)),
         ]))),
     ])
@@ -96,6 +126,18 @@ class Protocol(p2protocol.Protocol):
         ('have', pack.ListType(pack.IntType(256))),
         ('last', pack.PossiblyNoneType(0, pack.IntType(256))),
     ])
+    def handle_getheaders(self, version, have, last):
+        pass
+    message_sendheaders = pack.ComposedType([])
+    def handle_sendheaders(self):
+        pass
+    message_sendcmpct = pack.ComposedType([
+        ('announce', pack.BoolType()),
+        ('version', pack.IntType(64)),
+    ])
+    def handle_sendcmpct(self, announce, version):
+        pass
+
     message_getaddr = pack.ComposedType([])
 
     message_addr = pack.ComposedType([
@@ -157,6 +199,18 @@ class Protocol(p2protocol.Protocol):
     ])
     def handle_alert(self, message, signature):
         pass # print 'ALERT:', (message, signature)
+
+    message_dsq = pack.ComposedType([
+        ('denom', pack.IntType(32)),
+        ('masternode_outpoint', pack.PossiblyNoneType(dict(hash=0, index=0), pack.ComposedType([
+            ('hash', pack.IntType(256)),
+            ('index', pack.IntType(32)),
+        ]))),
+        ('time', pack.IntType(64)),
+        ('signature', pack.PossiblyNoneType(b'', pack.VarStrType())),
+    ])
+    def handle_dsq(self, denom, masternode_outpoint, time, signature):
+        pass # print 'dsq:', (denom, masternode_outpoint, time, signature)
 
     def connectionLost(self, reason):
         if hasattr(self.factory, 'gotConnection'):
