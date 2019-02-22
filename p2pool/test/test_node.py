@@ -83,7 +83,7 @@ class dashd(object): # can be used as p2p factory, p2p protocol, or rpc jsonrpc 
         for i in xrange(100):
             fee = i
             txs.append(dict(
-                data=dash_data.tx_type.pack(dict(version=1, type=0, tx_ins=[], tx_outs=[dict(value=fee, script='hello!'*100)], lock_time=0, payload=None)).encode('hex'),
+                data=dash_data.tx_type.pack(dict(version=1, type=0, tx_ins=[], tx_outs=[dict(value=fee, script='hello!'*100)], lock_time=0, extra_payload=None)).encode('hex'),
                 fee=fee,
             ))
         return {

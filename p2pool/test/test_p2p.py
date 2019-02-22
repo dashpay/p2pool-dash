@@ -58,7 +58,7 @@ class Test(unittest.TestCase):
                             script='x'*900000,
                         )],
                         lock_time=i,
-                        payload=None,
+                        extra_payload=None,
                     )
                     new_mining_txs[dash_data.hash256(dash_data.tx_type.pack(huge_tx))] = huge_tx
                 self.mining_txs_var.set(new_mining_txs)
