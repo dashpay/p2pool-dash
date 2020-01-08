@@ -13,7 +13,7 @@ ADDRESS_VERSION = 140
 SCRIPT_ADDRESS_VERSION = 19
 RPC_PORT = 19998
 RPC_CHECK = defer.inlineCallbacks(lambda dashd: defer.returnValue(
-            'dash' in (yield dashd.rpc_help()) and
+            '== Dash ==' in (yield dashd.rpc_help()) and
             (yield dashd.rpc_getblockchaininfo())['chain'] != 'main'
         ))
 BLOCKHASH_FUNC = lambda data: pack.IntType(256).unpack(__import__('dash_hash').getPoWHash(data))
