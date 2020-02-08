@@ -82,7 +82,7 @@ def main(args, net, datadir_path, merged_urls, worker_endpoint):
         def connect_p2p():
             # connect to dashd over dash-p2p
             print '''Testing dashd P2P connection to '%s:%s'...''' % (args.dashd_address, args.dashd_p2p_port)
-            factory = dash_p2p.ClientFactory(net.PARENT)
+            factory = dash_p2p.ClientFactory(net.PARENT, args.devnet)
             reactor.connectTCP(args.dashd_address, args.dashd_p2p_port, factory)
             def long():
                 print '''    ...taking a while. Common reasons for this include all of dashd's connection slots being used...'''
@@ -93,7 +93,7 @@ def main(args, net, datadir_path, merged_urls, worker_endpoint):
             print
             defer.returnValue(factory)
         
-        if args.testnet: # establish p2p connection first if testnet so dashd can work without connections
+        if args.testnet or args.devnet is not None: # establish p2p connection first if testnet or devnet so dashd can work without connections
             factory = yield connect_p2p()
         
         # connect to dashd over JSON-RPC and do initial getmemorypool
@@ -115,7 +115,7 @@ def main(args, net, datadir_path, merged_urls, worker_endpoint):
         print '    Current block height: %i' % (temp_work['height'] - 1,)
         print
         
-        if not args.testnet:
+        if not args.testnet and args.devnet is None:
             factory = yield connect_p2p()
         
         print 'Determining payout address...'
@@ -482,7 +482,7 @@ def run():
         print 'Pausing for 3 seconds...'
         time.sleep(3)
     
-    realnets = dict((name, net) for name, net in networks.nets.iteritems() if '_testnet' not in name)
+    realnets = dict((name, net) for name, net in networks.nets.iteritems() if ('_testnet' not in name and '_devnet' not in name))
     
     parser = fixargparse.FixedArgumentParser(description='p2pool (version %s)' % (p2pool.__version__,), fromfile_prefix_chars='@')
     parser.add_argument('--version', action='version', version=p2pool.__version__)
@@ -492,6 +492,9 @@ def run():
     parser.add_argument('--testnet',
         help='''use the network's testnet''',
         action='store_const', const=True, default=False, dest='testnet')
+    parser.add_argument('--devnet',
+        help='''use the network's devnet''',
+        type=str, action='store', default=None, dest='devnet')
     parser.add_argument('--debug',
         help='enable debugging mode',
         action='store_const', const=True, default=False, dest='debug')
@@ -589,7 +592,7 @@ def run():
     else:
         p2pool.DEBUG = False
     
-    net_name = args.net_name + ('_testnet' if args.testnet else '')
+    net_name = args.net_name + ('_testnet' if args.testnet else '') + ('_devnet' if args.devnet is not None else '')
     net = networks.nets[net_name]
     
     datadir_path = os.path.join((os.path.join(os.path.dirname(sys.argv[0]), 'data') if args.datadir is None else args.datadir), net_name)
