@@ -14,7 +14,7 @@ SCRIPT_ADDRESS_VERSION = 19
 RPC_PORT = 19798
 RPC_CHECK = defer.inlineCallbacks(lambda dashd: defer.returnValue(
             (yield helper.check_block_header(dashd, '000008ca1832a4baf228eb1553c03d3a2c8e02399550dd6ea8d65cec3ef23d2e')) and
-            (yield dashd.rpc_getblockchaininfo())['chain'] == 'dev'
+            (yield dashd.rpc_getblockchaininfo())['chain'] == 'devnet'
         ))
 BLOCKHASH_FUNC = lambda data: pack.IntType(256).unpack(__import__('dash_hash').getPoWHash(data))
 POW_FUNC = lambda data: pack.IntType(256).unpack(__import__('dash_hash').getPoWHash(data))
