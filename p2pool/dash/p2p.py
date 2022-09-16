@@ -19,7 +19,7 @@ class Protocol(p2protocol.Protocol):
 
     def connectionMade(self):
         self.send_version(
-            version=70213,
+            version=70223,
             services=1,
             time=int(time.time()),
             addr_to=dict(
@@ -63,7 +63,7 @@ class Protocol(p2protocol.Protocol):
         self.pinger = deferral.RobustLoopingCall(self.send_ping, nonce=1234)
         self.pinger.start(30)
 
-    # https://github.com/dashpay/dash/blob/v0.12.1.x/src/protocol.h#L338-L362
+    # https://github.com/dashpay/dash/blob/master/src/protocol.h#L441-L471
     message_inv = pack.ComposedType([
         ('invs', pack.ListType(pack.ComposedType([
             ('type', pack.EnumType(pack.IntType(32), {
@@ -95,7 +95,9 @@ class Protocol(p2protocol.Protocol):
                 26: 'quorum_premature_commitment',
                 27: 'quorum_debug_status',
                 28: 'quorum_recovered_sig',
-                29: 'clsig'
+                29: 'clsig',
+                30: 'islock',
+                31: 'isdlock'
             })),
             ('hash', pack.IntType(256)),
         ]))),
