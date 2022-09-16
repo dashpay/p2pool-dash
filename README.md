@@ -2,14 +2,15 @@ Requirements:
 -------------------------
 Generic:
 
-* Dashd >=0.13.0.0
+* Dashd >=0.18.0.0
 * Python >=2.7
 * Twisted >=13.0.0
 * Zope.interface >=3.8.0
+* pycrypto >= 2.6.1
 
 Linux:
 
-    sudo apt-get install python-zope.interface python-twisted python-twisted-web python-dev
+    sudo apt-get install python2 python2-dev python2-twisted python2-pip-whl python2-setuptools-whl
     sudo apt-get install gcc g++
 
 Install Python modules:
