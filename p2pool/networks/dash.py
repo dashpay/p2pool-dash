@@ -14,6 +14,6 @@ MIN_TARGET = 0
 MAX_TARGET = 2**256//2**20 - 1
 PERSIST = True
 WORKER_PORT = 7903
-BOOTSTRAP_ADDRS = 'dash01.p2poolmining.us p2pool.2sar.ru dash02.p2poolmining.us p2pool.dash.siampm.com dash03.p2poolmining.us crypto.office-on-the.net dash04.p2poolmining.us'.split(' ')
+BOOTSTRAP_ADDRS = 'dash01.p2poolmining.us p2pool.2sar.ru dash02.p2poolmining.us dash03.p2poolmining.us crypto.office-on-the.net dash04.p2poolmining.us'.split(' ')
 ANNOUNCE_CHANNEL = '#p2pool-dash'
-VERSION_CHECK = lambda v: v >= 120100
+VERSION_CHECK = lambda v: v >= 180000
