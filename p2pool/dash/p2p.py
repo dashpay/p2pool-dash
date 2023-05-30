@@ -13,9 +13,10 @@ from . import data as dash_data
 from p2pool.util import deferral, p2protocol, pack, variable
 
 class Protocol(p2protocol.Protocol):
-    def __init__(self, net):
+    def __init__(self, net, devnet):
         p2protocol.Protocol.__init__(self, net.P2P_PREFIX, 3145728, ignore_trailing_payload=True)
         self.net = net
+        self.devnet = devnet
 
     def connectionMade(self):
         self.send_version(
@@ -33,7 +34,7 @@ class Protocol(p2protocol.Protocol):
                 port=self.transport.getHost().port,
             ),
             nonce=random.randrange(2**64),
-            sub_version_num='/P2Pool:%s/' % (p2pool.__version__,),
+            sub_version_num='/P2Pool:%s%s/' % (p2pool.__version__, '(devnet=devnet-%s)' % self.devnet if self.devnet is not None else '',),
             start_height=0,
         )
 
@@ -227,8 +228,9 @@ class ClientFactory(protocol.ReconnectingClientFactory):
 
     maxDelay = 1
 
-    def __init__(self, net):
+    def __init__(self, net, devnet):
         self.net = net
+        self.devnet = devnet
         self.conn = variable.Variable(None)
 
         self.new_block = variable.Event()
@@ -236,7 +238,7 @@ class ClientFactory(protocol.ReconnectingClientFactory):
         self.new_headers = variable.Event()
 
     def buildProtocol(self, addr):
-        p = self.protocol(self.net)
+        p = self.protocol(self.net, self.devnet)
         p.factory = self
         return p
 
